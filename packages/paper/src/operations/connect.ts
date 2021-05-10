@@ -1,16 +1,15 @@
-import { Document, OperationContext } from '../types';
+import { KeyOrDocument, OperationContext } from '../types';
 import { connectDocument } from '../utils/connect-document';
 import { getDocumentKey } from '../utils/get-document-key';
 import { findOperation } from './find';
 
 export function connectOperation(
   context: OperationContext,
-  [keyOrDocument, field]: [string | Document, string],
-  [connectedKeyOrDocument, connectedInverseField]: [string | Document, string?],
+  [keyOrDocument, field]: [KeyOrDocument, string],
+  [connectedKeyOrDocument, connectedInverseField]: [KeyOrDocument, string?],
 ): void {
-  const key = keyOrDocument === 'string' ? keyOrDocument : getDocumentKey(keyOrDocument as Document);
-  const connectedKey =
-    connectedKeyOrDocument === 'string' ? connectedKeyOrDocument : getDocumentKey(connectedKeyOrDocument as Document);
+  const key = getDocumentKey(keyOrDocument);
+  const connectedKey = getDocumentKey(connectedKeyOrDocument);
 
   const document = findOperation(context, key);
 

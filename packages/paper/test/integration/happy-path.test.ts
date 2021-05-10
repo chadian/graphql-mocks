@@ -54,4 +54,23 @@ describe('happy path', () => {
     expect(account?.id).to.equal('1');
     expect(account?.email).to.equal('windows95@aol.com');
   });
+
+  it('creates a new document with a connected document implictly', async () => {
+    await store.mutate(({ add }) => {
+      const account = add('Account', {
+        id: '1',
+        email: 'windows95@aol.com',
+      });
+
+      add('App', {
+        id: '1',
+        name: 'my-fancy-app',
+        owner: account,
+      });
+    });
+
+    const app = store.find('App', (document) => document.id === '1');
+    expect(app?.name).to.equal('my-fancy-app');
+    expect(app?.owner?.email).to.equal('windows95@aol.com');
+  });
 });

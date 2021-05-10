@@ -1,3 +1,4 @@
+import { GraphQLSchema } from 'graphql';
 import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL, DOCUMENT_GRAPHQL_TYPENAME } from './constants';
 
 export { DefaultContextualOperations } from './operations/types';
@@ -31,6 +32,7 @@ export type DataStore<Typename extends string = string> = Record<Typename, Docum
 
 export type OperationContext = {
   data: DataStore;
+  schema: GraphQLSchema;
 };
 
 export interface Operation {

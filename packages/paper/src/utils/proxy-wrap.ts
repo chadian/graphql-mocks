@@ -14,10 +14,14 @@ export function proxyWrap(store: Store, target: DataStore | Document): DataStore
       if (Reflect.has(target, prop)) {
         let result = Reflect.get(target, prop);
 
-        // this is important for maintaining the original `this` reference
-        // for functions where it is critical (ie: Map and Set)
         if (typeof result === 'function') {
-          result = result.bind(target);
+          const origFn = result;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          result = function (...args: any) {
+            const fnResult = origFn.call(target, ...args);
+            return proxyWrap(store, fnResult);
+          };
         }
 
         const wrapped = typeof result === 'object' ? proxyWrap(store, result) : result;

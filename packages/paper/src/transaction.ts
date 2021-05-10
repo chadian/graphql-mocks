@@ -5,9 +5,10 @@ import { connectOperation } from './operations/connect';
 import { removeOperation } from './operations/remove';
 import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
 import { DataStore, TransactionCallback } from './types';
+import { GraphQLSchema } from 'graphql';
 
-export function transaction(draft: DataStore, fn: TransactionCallback): DataStore {
-  const context = { data: draft };
+export function transaction(draft: DataStore, schema: GraphQLSchema, fn: TransactionCallback): DataStore {
+  const context = { schema, data: draft };
 
   // operations
   const add = addOperation.bind(null, context);

@@ -1,11 +1,33 @@
+import { GraphQLObjectType } from 'graphql';
 import { Document, DocumentPartial, OperationContext } from '../types';
 import { createDocument } from '../utils/create-document';
+import { getDocumentKey } from '../utils/get-document-key';
+import { extractObjectTypes } from '../utils/graphql/extract-object-types';
+import { isDocument } from '../utils/is-document';
+import { connectOperation } from './connect';
 
 export function addOperation(context: OperationContext, typename: string, documentPartial: DocumentPartial): Document {
-  const { data } = context;
-  data[typename] = data[typename] || [];
+  const { data, schema } = context;
   const document = createDocument(typename, documentPartial);
+  const gqlType = schema.getType(typename) as Partial<GraphQLObjectType>;
+  const gqlTypeFields = (gqlType?.getFields && gqlType?.getFields()) ?? {};
+
+  // setup array of types if it doesn't already exist
+  data[typename] = data[typename] || [];
   data[typename].push(document);
+
+  for (const prop in document) {
+    const docPropValue = document[prop];
+    const field = gqlTypeFields[prop];
+    const possibleObjectTypes = extractObjectTypes(schema, field.type);
+
+    if (field && possibleObjectTypes.length > 0 && isDocument(docPropValue)) {
+      // been moved to a document connection instead, no longer needed as a document value
+      delete document[prop];
+      console.log('connecting', getDocumentKey(document), prop, 'to', getDocumentKey(docPropValue));
+      connectOperation(context, [document, prop], [docPropValue]);
+    }
+  }
 
   return document;
 }

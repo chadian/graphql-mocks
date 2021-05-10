@@ -34,26 +34,19 @@ export class Store {
   }
 
   findDocument(documentOrKey: KeyOrDocument): Document | undefined {
-    return findDocument(this.current, documentOrKey);
+    return findDocument(this.data, documentOrKey);
   }
 
   find(typename: string, findFunction: (doc: Document) => boolean): Document | undefined {
-    const typeStore = this.current[typename] ?? [];
-
-    return typeStore.find((document) => {
-      const frozen = Object.freeze({
-        ...document,
-      });
-
-      return findFunction(frozen);
-    });
+    const typeStore = this.data[typename] ?? [];
+    return typeStore.find(findFunction);
   }
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
     fn: TransactionCallback<T>,
   ): Promise<Store> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const next: DataStore = produce(transaction)(this.current, fn as any);
+    const next: DataStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
 
     graphqlCheck(next, this.sourceGrapQLSchema);
 

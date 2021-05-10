@@ -3,6 +3,7 @@ import { DataStore, Document } from '../types';
 import { findDocumentForType } from '../utils/find-document-for-type';
 import { getConnections } from '../utils/get-connections';
 import { extractListType } from '../utils/graphql/extract-list-type';
+import { extractObjectTypes } from '../utils/graphql/extract-object-types';
 import { typeExists } from '../utils/graphql/type-exists';
 import { unwrap } from '../utils/graphql/unwrap';
 import { FieldCannotConnectMultiple } from './errors/field-cannot-connect-multiple';
@@ -68,9 +69,9 @@ export function graphqlConnectionsCheck(options: Options): void {
     const fieldDocumentKeys = Array.from(documentConnections[documentConnectionField]);
     const graphqlField = graphqlTypeFields[documentConnectionField];
 
-    const containsObjectType = isObjectType(unwrap(graphqlField.type));
+    const possibleObjectTypes = extractObjectTypes(graphqlSchema, graphqlField.type);
 
-    if (!containsObjectType) {
+    if (possibleObjectTypes.length === 0) {
       throw new FieldReturnTypeMismatch({
         field: graphqlField,
         actual: graphqlField.toString(),
@@ -83,10 +84,16 @@ export function graphqlConnectionsCheck(options: Options): void {
     }
 
     for (const documentKey of fieldDocumentKeys) {
-      const connectedDocument = findDocumentForType(data, typename, documentKey);
+      const connectedDocument = possibleObjectTypes
+        .map((possibleType) => findDocumentForType(data, possibleType.name, documentKey))
+        .find((document) => !!document);
 
       if (!connectedDocument) {
-        throw new Error(`Connected document with key ${documentKey} was not found on the expected type ${typename}`);
+        throw new Error(
+          `Connected document with key ${documentKey} was not found for the possible types: ${possibleObjectTypes.join(
+            ', ',
+          )}`,
+        );
       }
     }
   }
