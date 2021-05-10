@@ -2,7 +2,6 @@
 
 ## TODO
 
-- [ ] Make API friendly for extracting ID if passed a document, ie connect(ID or document(id is internally stashed))
 - [ ] Involve the GraphQL Schema for transaction checks
 - [ ] Visualize
       documents & keys and connections only
@@ -23,3 +22,4 @@
       This means being able to do store.data.Persons[0].friends
       where `friends` is a getter that can look at the meta and dynamically
       represent/lookup the corresponding object
+- [X] Make API friendly for extracting ID if passed a document, ie connect(ID or document(id is internally stashed))
