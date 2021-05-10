@@ -4,8 +4,9 @@ import { findOperation } from './operations/find';
 import { connectOperation } from './operations/connect';
 import { removeOperation } from './operations/remove';
 import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
+import { DataStore, TransactionCallback } from './types';
 
-export function transaction(draft, fn) {
+export function transaction(draft: DataStore, fn: TransactionCallback): DataStore {
   const context = { data: draft };
 
   // operations

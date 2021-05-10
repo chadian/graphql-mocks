@@ -1,12 +1,15 @@
-import { generateDocumentKey } from '../utils/generate-document-key';
-import { DOCUMENT_ID_SYMBOL } from '../constants';
+import { Document, DocumentPartial, Operation } from '../types';
+import { createDocument } from '../utils/create-document';
 
-export function addOperation(context, type, document) {
-  const {data} = context;
-  const id = generateDocumentKey();
-  data[type] = data[type] || [];
-  document[DOCUMENT_ID_SYMBOL] = id;
-  data[type].push(document);
+export const addOperation: Operation = function addOperation(
+  context,
+  typename: string,
+  documentPartial: DocumentPartial,
+): Document {
+  const { data } = context;
+  data[typename] = data[typename] || [];
+  const document = createDocument(documentPartial);
+  data[typename].push(document);
 
-  return id;
-}
+  return document;
+};

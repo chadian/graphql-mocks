@@ -1,9 +1,16 @@
+import { Store } from '..';
+import { DataStore, Document } from '../types';
 import { getConnections } from '../utils/get-connections';
 import { findDocument } from './find-document';
+import { isDocument } from './is-document';
 
-export function proxyWrap(store, target) {
+export function proxyWrap(store: Store, target: DataStore | Document): DataStore {
   return new Proxy(target, {
     get(target, prop) {
+      if (typeof prop !== 'string') {
+        return Reflect.get(target, prop);
+      }
+
       if (Reflect.has(target, prop)) {
         let result = Reflect.get(target, prop);
 
@@ -17,13 +24,18 @@ export function proxyWrap(store, target) {
         return wrapped;
       }
 
-      const connectedDocumentKeys = getConnections(target)[prop];
-      if (connectedDocumentKeys) {
-        const connectedDocuments = Array.from(connectedDocumentKeys)
-          .map((key) => findDocument(store._data, key))
-          .map((document) => proxyWrap(store, document));
+      if (isDocument(target)) {
+        const connectedDocumentKeys = getConnections(target)[prop];
 
-        return connectedDocuments.length === 1 ? connectedDocuments[0] : connectedDocuments;
+        if (connectedDocumentKeys) {
+          const connectedDocuments = Array.from(connectedDocumentKeys)
+            .map((key) => findDocument(store._data, key))
+            .filter(Boolean)
+            .map((document) => proxyWrap(store, document as Document));
+
+          // TODO: Do type check on whether to return singular or plural
+          return connectedDocuments.length === 1 ? connectedDocuments[0] : connectedDocuments;
+        }
       }
 
       return Reflect.get(target, prop);
