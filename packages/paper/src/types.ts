@@ -1,20 +1,25 @@
 import { CONNECTION_KEY_SYMBOL, DOCUMENT_ID_SYMBOL } from './constants';
 
-// connections
-type ConnectionFieldName = string;
-export type ConnectionsMap = Record<ConnectionFieldName, Connections>;
-type Connections = Set<string>;
+export { DefaultContextualOperations } from './operations/types';
 
 // documents
+
+export type DocumentKey = string;
+export type KeyOrDocument = DocumentKey | Document;
 
 export type Document = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [k: string]: any;
-  [DOCUMENT_ID_SYMBOL]: string;
+  [DOCUMENT_ID_SYMBOL]: DocumentKey;
   [CONNECTION_KEY_SYMBOL]: ConnectionsMap;
 };
 
 export type DocumentPartial = Partial<Document>;
+
+// connections
+type ConnectionFieldName = string;
+export type ConnectionsMap = Record<ConnectionFieldName, Connections>;
+type Connections = Set<string>;
 
 // store
 
@@ -23,7 +28,7 @@ export type DataStore<Typename extends string = string> = Record<Typename, Docum
 
 // operations
 
-type OperationContext = {
+export type OperationContext = {
   data: DataStore;
 };
 
@@ -38,10 +43,10 @@ export interface Operation {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ContextualOperation = (...operationArgs: any[]) => any;
 
-type ContextualOperationMap = {
+export type ContextualOperationMap = {
   [key: string]: ContextualOperation;
 };
 
-export interface TransactionCallback {
-  (operations: ContextualOperationMap): void;
+export interface TransactionCallback<T extends ContextualOperationMap = ContextualOperationMap> {
+  (operations: T): void;
 }

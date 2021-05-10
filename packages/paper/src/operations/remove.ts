@@ -1,19 +1,27 @@
-import { Document, Operation } from '../types';
+import { Document, DocumentKey, OperationContext } from '../types';
 import { getDocumentId } from '../utils/get-document-id';
 
-export const removeOperation: Operation = function removeOperation(context, id) {
+// TODO: Change `id` arg to `idOrDocument`
+export function removeOperation(context: OperationContext, id: DocumentKey): Document {
   const { data } = context;
-  let found = false;
 
+  let document;
   Object.entries(data).forEach(([type, documents]) => {
-    const documentToRemove = documents.find((document: Document) => getDocumentId(document) === id);
-
-    found = Boolean(documentToRemove);
+    const found = documents.find((document: Document) => getDocumentId(document) === id);
 
     if (found) {
-      data[type] = documents.filter((document: Document) => document !== documentToRemove);
+      data[type] = documents.filter((document: Document) => document !== found);
+      document = found;
     }
   });
 
-  return found;
-};
+  if (!document) {
+    throw new Error(`Could not find document ${id} to remove`);
+  }
+
+  return document;
+}
+
+// Only used for generating type after the resulting `bind`
+const bound = removeOperation.bind(null, {} as OperationContext);
+export type ContextualOperation = typeof bound;
