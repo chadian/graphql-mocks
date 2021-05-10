@@ -1,0 +1,38 @@
+{
+  "name": "@graphql-mocks/paper",
+  "version": "0.0.0",
+  "author": "Chad Carbert",
+  "description": "",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "module": "dist/es/index.js",
+  "unpkg": "dist/bundles/graphql-mocks-paper.umd.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "pretest": "tsc --noEmit && yarn lint",
+    "test": "TS_NODE_PROJECT=\"./test/tsconfig.json\" jest -r ts-node/register \"./test/**/*.test.ts\"",
+    "clean": "rimraf ./dist",
+    "copy-pjson": "node scripts/copy-scrubbed-pjson",
+    "build": "yarn clean && rollup -c rollup.config.js && yarn copy-pjson",
+    "watch": "rollup --watch -c rollup-watch.config.js"
+  },
+  "publishConfig": {
+    "directory": "dist"
+  },
+  "engines": {
+    "node": ">= 12.0.0"
+  },
+  "dependencies": {
+    "immer": "^8.0.0",
+    "lodash.merge": "^4.6.2",
+    "nanoid": "^3.1.20"
+  },
+  "devDependencies": {
+    "graphql": "^14"
+  },
+  "peerDependencies": {
+    "graphql": "^14.0.0 || ^15.0.0"
+  }
+}
