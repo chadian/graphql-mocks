@@ -18,7 +18,9 @@ export class Store {
     return proxyWrap(this, this._data);
   }
 
-  mutate<T extends ContextualOperationMap = DefaultContextualOperations>(fn: TransactionCallback<T>): Store {
+  async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
+    fn: TransactionCallback<T>,
+  ): Promise<Store> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const next: DataStore = produce(transaction)(this._data, fn as any);
     // TODO: Add validation of the `next`

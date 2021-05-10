@@ -10,8 +10,8 @@ describe('mutation operations', () => {
     store = new Store();
   });
 
-  it('can add a document', () => {
-    store.mutate(({ add }) => {
+  it('can add a document', async () => {
+    await store.mutate(({ add }) => {
       add('Person', {
         name: 'Ronald',
       });
@@ -23,13 +23,13 @@ describe('mutation operations', () => {
     expect(getDocumentId(ronald!)).not.to.be.null;
   });
 
-  it('can find a document given a key within a mutation operation', () => {
+  it('can find a document given a key within a mutation operation', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ronaldDoc: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let foundRonaldDoc: any;
 
-    store.mutate(({ add, find }) => {
+    await store.mutate(({ add, find }) => {
       ronaldDoc = add('Person', {
         name: 'Ronald',
       });
@@ -41,8 +41,8 @@ describe('mutation operations', () => {
     expect(ronaldDoc).to.deep.equal(foundRonaldDoc);
   });
 
-  it('can connect one document to another', () => {
-    store.mutate(({ add, connect }) => {
+  it('can connect one document to another', async () => {
+    await store.mutate(({ add, connect }) => {
       const ronald = add('Person', {
         name: 'Ronald',
       });
@@ -65,10 +65,10 @@ describe('mutation operations', () => {
 describe('data', () => {
   let store: Store;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     store = new Store();
 
-    store.mutate(({ add, connect }) => {
+    await store.mutate(({ add, connect }) => {
       const ronald = add('Person', {
         name: 'Ronald',
       });

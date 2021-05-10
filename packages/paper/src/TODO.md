@@ -3,16 +3,15 @@
 ## TODO
 
 - [ ] Involve the GraphQL Schema for transaction checks
-- [ ] Visualize
-      documents & keys and connections only
-- [ ] Factory helpers
-- [ ] Make `mutate` async
   - [ ] Make reads to the store sync
   - [ ] Maybe add a `static` or a `readOnly` container that is like
         a mutation frame but with read-only operations
 - [ ] How to handle unions/interfaces?
 - [ ] Create documents that do not correspond with an GraphQL type
 - [ ] Capture events from transaction
+- [ ] Factory helpers
+- [ ] Visualize
+      documents & keys and connections only
 
 ## DONE
 
@@ -23,3 +22,4 @@
       where `friends` is a getter that can look at the meta and dynamically
       represent/lookup the corresponding object
 - [X] Make API friendly for extracting ID if passed a document, ie connect(ID or document(id is internally stashed))
+- [X] Make `mutate` async
