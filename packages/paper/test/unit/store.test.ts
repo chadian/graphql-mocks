@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Store } from '../../src/store';
+import { Paper } from '../../src/paper';
 import { getDocumentKey } from '../../src/utils/get-document-key';
 import { getConnections } from '../../src/utils/get-connections';
 import { buildSchema } from 'graphql';
@@ -22,20 +22,20 @@ const schemaString = `
 const graphqlSchema = buildSchema(schemaString);
 
 describe('mutation operations', () => {
-  let store: Store;
+  let paper: Paper;
 
   beforeEach(() => {
-    store = new Store(graphqlSchema);
+    paper = new Paper(graphqlSchema);
   });
 
   it('can add a document', async () => {
-    await store.mutate(({ add }) => {
+    await paper.mutate(({ add }) => {
       add('Person', {
         name: 'Ronald',
       });
     });
 
-    const ronald = store.data.Person.find((person) => person.name === 'Ronald');
+    const ronald = paper.data.Person.find((person) => person.name === 'Ronald');
     expect(ronald?.name).to.equal('Ronald');
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(getDocumentKey(ronald!)).not.to.be.null;
@@ -47,7 +47,7 @@ describe('mutation operations', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let foundRonaldDoc: any;
 
-    await store.mutate(({ add, find }) => {
+    await paper.mutate(({ add, find }) => {
       ronaldDoc = add('Person', {
         name: 'Ronald',
       });
@@ -60,7 +60,7 @@ describe('mutation operations', () => {
   });
 
   it('can connect one document to another', async () => {
-    await store.mutate(({ add, connect }) => {
+    await paper.mutate(({ add, connect }) => {
       const ronald = add('Person', {
         name: 'Ronald',
       });
@@ -72,8 +72,8 @@ describe('mutation operations', () => {
       connect([ronald, 'friend'], [june]);
     });
 
-    const ronald = store.data.Person.find((person) => person.name === 'Ronald');
-    const june = store.data.Person.find((person) => person.name === 'June');
+    const ronald = paper.data.Person.find((person) => person.name === 'Ronald');
+    const june = paper.data.Person.find((person) => person.name === 'June');
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(getConnections(ronald!).friend.includes(getDocumentKey(june!)!)).to.equal(true);
@@ -81,12 +81,12 @@ describe('mutation operations', () => {
 });
 
 describe('data', () => {
-  let store: Store;
+  let paper: Paper;
 
   beforeEach(async () => {
-    store = new Store(graphqlSchema);
+    paper = new Paper(graphqlSchema);
 
-    await store.mutate(({ add, connect }) => {
+    await paper.mutate(({ add, connect }) => {
       const ronald = add('Person', {
         name: 'Ronald',
       });
@@ -100,14 +100,14 @@ describe('data', () => {
   });
 
   it('can retrieve simple data from a document', () => {
-    expect(store.data.Person[0].name).to.equal('Ronald');
+    expect(paper.data.Person[0].name).to.equal('Ronald');
   });
 
   it('can retrieve connected documents from a document', () => {
-    expect(store.data.Person[0].bestFriend.name).to.equal('Jessica');
+    expect(paper.data.Person[0].bestFriend.name).to.equal('Jessica');
   });
 
   it('can retrieve cyclical connected documents from a document', () => {
-    expect(store.data.Person[0].bestFriend.friend.name).to.equal('Ronald');
+    expect(paper.data.Person[0].bestFriend.friend.name).to.equal('Ronald');
   });
 });

@@ -1,10 +1,9 @@
-import { Store } from '..';
 import { DataStore, Document } from '../types';
 import { getConnections } from '../utils/get-connections';
 import { findDocument } from './find-document';
 import { isDocument } from './is-document';
 
-export function proxyWrap<T extends DataStore | Document>(store: Store, target: T): T {
+export function proxyWrap<T extends DataStore | Document>(store: DataStore, target: T): T {
   return new Proxy(target, {
     get(target, prop) {
       if (typeof prop !== 'string') {
@@ -33,7 +32,7 @@ export function proxyWrap<T extends DataStore | Document>(store: Store, target: 
 
         if (connectedDocumentKeys) {
           const connectedDocuments = Array.from(connectedDocumentKeys)
-            .map((key) => findDocument(store.current, key))
+            .map((key) => findDocument(store, key))
             .filter(Boolean)
             .map((document) => proxyWrap(store, document as Document));
 

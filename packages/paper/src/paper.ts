@@ -30,7 +30,7 @@ import { scalarFieldValidator } from './validations/validators/scalar-field';
 // > https://exploringjs.com/deep-js/ch_proxies.html
 setAutoFreeze(false);
 
-export class Store {
+export class Paper {
   history: DataStore[] = [];
   current: DataStore = {};
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
@@ -50,18 +50,18 @@ export class Store {
   }
 
   get data(): DataStore {
-    return proxyWrap(this, this.current);
+    return proxyWrap(this.current, this.current);
   }
 
   findDocument(documentOrKey: KeyOrDocument): Document | undefined {
-    const result = findDocument(this.data, documentOrKey);
-    return isDocument(result) ? proxyWrap(this, result) : result;
+    const result = findDocument(this.current, documentOrKey);
+    return isDocument(result) ? proxyWrap(this.current, result) : result;
   }
 
   find(typename: string, findFunction: (doc: Document) => boolean): Document | undefined {
-    const typeStore = this.data[typename] ?? [];
-    const result = typeStore.find(findFunction);
-    return isDocument(result) ? proxyWrap(this, result) : result;
+    const typeDocuments = this.current[typename] ?? [];
+    const result = typeDocuments.find(findFunction);
+    return isDocument(result) ? proxyWrap(this.current, result) : result;
   }
 
   validate(_store?: DataStore): void {
@@ -79,7 +79,7 @@ export class Store {
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
     fn: TransactionCallback<T>,
-  ): Promise<Store> {
+  ): Promise<Paper> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const next: DataStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
 
