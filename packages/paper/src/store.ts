@@ -12,6 +12,7 @@ import {
 import { graphqlCheck } from './validations/graphql-check';
 import { GraphQLSchema } from 'graphql';
 import { findDocument } from './utils/find-document';
+import { isDocument } from './utils/is-document';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -34,12 +35,14 @@ export class Store {
   }
 
   findDocument(documentOrKey: KeyOrDocument): Document | undefined {
-    return findDocument(this.data, documentOrKey);
+    const result = findDocument(this.data, documentOrKey);
+    return isDocument(result) ? proxyWrap(this, result) : result;
   }
 
   find(typename: string, findFunction: (doc: Document) => boolean): Document | undefined {
     const typeStore = this.data[typename] ?? [];
-    return typeStore.find(findFunction);
+    const result = typeStore.find(findFunction);
+    return isDocument(result) ? proxyWrap(this, result) : result;
   }
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(

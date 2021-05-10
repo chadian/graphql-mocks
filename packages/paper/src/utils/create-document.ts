@@ -5,6 +5,7 @@ import { generateDocumentKey } from './generate-document-key';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDocument<T extends Document = Document>(
   typename: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   partial: Record<string | symbol, any>,
   id?: string,
 ): T {

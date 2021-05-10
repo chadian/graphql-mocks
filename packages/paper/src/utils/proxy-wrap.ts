@@ -4,7 +4,7 @@ import { getConnections } from '../utils/get-connections';
 import { findDocument } from './find-document';
 import { isDocument } from './is-document';
 
-export function proxyWrap(store: Store, target: DataStore | Document): DataStore {
+export function proxyWrap<T extends DataStore | Document>(store: Store, target: T): T {
   return new Proxy(target, {
     get(target, prop) {
       if (typeof prop !== 'string') {
