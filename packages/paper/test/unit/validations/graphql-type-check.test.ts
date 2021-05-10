@@ -84,9 +84,7 @@ describe('graphql-type-check', () => {
       `);
 
       const document = createDocument('Person', {});
-
-      // connectDocument(document, 'bestFriend', createDocument('Person', { name: 'Larry' }));
-
+      connectDocument(document, 'bestFriend', createDocument('Person', { name: 'Larry' }));
       expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.not.throw();
     });
   });

@@ -1,5 +1,6 @@
 import {
   GraphQLField,
+  GraphQLObjectType,
   GraphQLSchema,
   isListType,
   isNonNullType,
@@ -20,15 +21,44 @@ import { TypeIsNotDocumentCompatible } from './errors/type-is-not-document-compa
 type Options = { graphqlSchema: GraphQLSchema; typename: string; document: Document };
 
 interface FieldValidator {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validate(parts: { graphqlField: GraphQLField<any, any>; fieldValue: any }): void;
+  /**
+   * Skip when the field is represented by a connected value on the document
+   */
+  skipConnectedValue: boolean;
+
+  /**
+   * Skip when the field is represented by a null or undefined value on the document
+   */
+  skipNullValue: boolean;
+
+  validate(parts: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: GraphQLObjectType<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: GraphQLField<any, any>;
+    document: Document;
+    fieldName: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fieldValue: any;
+  }): void;
+}
+
+interface DocumentTypeValidator {
+  validate(parts: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: GraphQLObjectType<any>;
+    document: Document;
+    graphqlSchema: GraphQLSchema;
+  }): void;
 }
 
 const objectFieldValidator: FieldValidator = {
-  validate({ graphqlField, fieldValue }) {
-    if (isObjectType(graphqlField.type) && typeof fieldValue !== 'object') {
+  skipConnectedValue: true,
+  skipNullValue: true,
+  validate({ field, fieldValue }) {
+    if (isObjectType(field.type) && typeof fieldValue !== 'object') {
       throw new FieldReturnTypeMismatch({
-        field: graphqlField,
+        field: field,
         expected: 'object',
         actual: typeof fieldValue,
       });
@@ -37,11 +67,13 @@ const objectFieldValidator: FieldValidator = {
 };
 
 const scalarFieldValidator: FieldValidator = {
-  validate({ graphqlField, fieldValue }) {
+  skipConnectedValue: false,
+  skipNullValue: true,
+  validate({ field, fieldValue }) {
     const jsScalars = ['boolean', 'number', 'string'];
-    if (isScalarType(graphqlField.type) && !jsScalars.includes(typeof fieldValue)) {
+    if (isScalarType(field.type) && !jsScalars.includes(typeof fieldValue)) {
       throw new FieldReturnTypeMismatch({
-        field: graphqlField,
+        field: field,
         expected: 'boolean, number, string',
         actual: typeof fieldValue,
       });
@@ -50,23 +82,25 @@ const scalarFieldValidator: FieldValidator = {
 };
 
 const listFieldValidator: FieldValidator = {
-  validate({ graphqlField, fieldValue }) {
-    if (isListType(graphqlField.type)) {
+  skipConnectedValue: true,
+  skipNullValue: true,
+  validate({ field, fieldValue }) {
+    if (isListType(field.type)) {
       if (!Array.isArray(fieldValue)) {
         throw new FieldReturnTypeMismatch({
-          field: graphqlField,
+          field: field,
           expected: 'Array',
           actual: typeof fieldValue,
         });
       }
 
       const nullishIndex = fieldValue.findIndex((element) => element == null);
-      const listType = extractListType(graphqlField.type);
+      const listType = extractListType(field.type);
       const isNullable = isNullableType(listType?.ofType);
 
       if (!isNullable && nullishIndex !== -1) {
         throw new FieldReturnTypeMismatch({
-          field: graphqlField,
+          field: field,
           expected: 'non-null list',
           actual: `${fieldValue[nullishIndex]} in the array`,
         });
@@ -76,15 +110,42 @@ const listFieldValidator: FieldValidator = {
 };
 
 const nonNullFieldValidator: FieldValidator = {
-  validate({ graphqlField, fieldValue }) {
-    if (isNonNullType(graphqlField.type)) {
+  skipConnectedValue: true,
+  skipNullValue: false,
+  validate({ field, fieldValue }) {
+    if (isNonNullType(field.type)) {
       if (fieldValue == null) {
         throw new FieldReturnTypeMismatch({
-          field: graphqlField,
+          field: field,
           expected: 'non-null',
           actual: fieldValue === undefined ? 'undefined' : 'null',
         });
       }
+    }
+  },
+};
+
+const fieldValueAndConnectionValueValidator: FieldValidator = {
+  skipConnectedValue: false,
+  skipNullValue: false,
+  validate({ type, fieldName, fieldValue, document }) {
+    const documentConnections = getConnections(document);
+    const connectionFieldValue = documentConnections[fieldName];
+    const hasFieldValueAndConnectionValue = fieldValue && connectionFieldValue;
+    if (hasFieldValueAndConnectionValue) {
+      throw new FieldDuplicateWithConnection({ type, fieldName });
+    }
+  },
+};
+
+const documentOnlyHasFieldsOnTypeValidator: DocumentTypeValidator = {
+  validate({ document, type }) {
+    const documentFieldNames = Object.keys(document);
+    const typeFieldNames = Object.keys(type.getFields());
+    const nonExistingFieldName = documentFieldNames.find((fieldName) => !typeFieldNames.includes(fieldName));
+
+    if (nonExistingFieldName) {
+      throw new FieldDoesNotExistOnType({ type, fieldName: nonExistingFieldName });
     }
   },
 };
@@ -101,25 +162,33 @@ export function graphqlTypeCheck({ graphqlSchema, typename, document }: Options)
     throw new TypeIsNotDocumentCompatible({ type });
   }
 
+  documentOnlyHasFieldsOnTypeValidator.validate({ document, type, graphqlSchema });
+
   const graphqlTypeFields = type.getFields();
-  const documentConnections = getConnections(document);
 
-  for (const documentField in document) {
-    const fieldValue = document[documentField];
-    const connectionFieldValue = documentConnections[documentField];
+  for (const fieldName in graphqlTypeFields) {
+    const field = graphqlTypeFields[fieldName];
+    const fieldValue = document[fieldName];
+    const hasConnectedValue = getConnections(document)[fieldName];
 
-    const fieldExistsOnType = documentField in graphqlTypeFields;
-    if (!fieldExistsOnType) {
-      throw new FieldDoesNotExistOnType({ type, fieldName: documentField });
-    }
+    const fieldValidators = [
+      fieldValueAndConnectionValueValidator,
+      objectFieldValidator,
+      scalarFieldValidator,
+      listFieldValidator,
+      nonNullFieldValidator,
+    ];
 
-    const hasFieldValueAndConnectionValue = fieldValue && connectionFieldValue;
-    if (hasFieldValueAndConnectionValue) {
-      throw new FieldDuplicateWithConnection({ type, fieldName: documentField });
-    }
+    fieldValidators.forEach((validator) => {
+      if (validator.skipConnectedValue && hasConnectedValue) {
+        return;
+      }
 
-    const graphqlField = graphqlTypeFields[documentField];
-    const fieldValidators = [objectFieldValidator, scalarFieldValidator, listFieldValidator, nonNullFieldValidator];
-    fieldValidators.forEach((validator) => validator.validate({ graphqlField, fieldValue }));
+      if (validator.skipNullValue && fieldValue == null) {
+        return;
+      }
+
+      validator.validate({ type, field, document, fieldName: field.name, fieldValue });
+    });
   }
 }
