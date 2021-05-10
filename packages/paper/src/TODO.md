@@ -2,10 +2,14 @@
 
 ## TODO
 
-- [ ] Create documents that do not correspond with an GraphQL type
+- [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
+      - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
+      - * Maybe a `skipMissingType` option on the validator interface
 - [ ] Capture events from transaction
+- [ ] GraphQL query option
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
+- [ ] unique ID field validator
 
 ## DONE
 
