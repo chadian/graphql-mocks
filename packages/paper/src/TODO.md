@@ -3,15 +3,21 @@
 ## TODO
 
 - [ ] Involve the GraphQL Schema for transaction checks
-  - [ ] Make reads to the store sync
-  - [ ] Maybe add a `static` or a `readOnly` container that is like
-        a mutation frame but with read-only operations
-- [ ] How to handle unions/interfaces?
+- [ ] Interfaces
+      * Discrete representations
+- [ ] Unions
+      * Unified or Discrete representations
 - [ ] Create documents that do not correspond with an GraphQL type
 - [ ] Capture events from transaction
 - [ ] Factory helpers
 - [ ] Visualize
       documents & keys and connections only
+- [ ] Make reads to the store sync
+- [ ] Maybe add a `static` or a `readOnly` container that is like
+      a mutation frame but with read-only operations
+- [ ] Memoize lookup functions per transactions?
+      If references within a transaction are guaranteed per key then
+      it might be possible to memoize...
 
 ## DONE
 

@@ -1,6 +1,6 @@
 import { DOCUMENT_CONNECTIONS_SYMBOL } from '../constants';
 import { Document, OperationContext } from '../types';
-import { getDocumentId } from '../utils/get-document-id';
+import { getDocumentKey } from '../utils/get-document-key';
 import { findOperation } from './find';
 
 export function connectOperation(
@@ -8,9 +8,9 @@ export function connectOperation(
   [keyOrDocument, field]: [string | Document, string],
   [connectedKeyOrDocument, connectedInverseField]: [string | Document, string?],
 ): void {
-  const key = keyOrDocument === 'string' ? keyOrDocument : getDocumentId(keyOrDocument as Document);
+  const key = keyOrDocument === 'string' ? keyOrDocument : getDocumentKey(keyOrDocument as Document);
   const connectedKey =
-    connectedKeyOrDocument === 'string' ? connectedKeyOrDocument : getDocumentId(connectedKeyOrDocument as Document);
+    connectedKeyOrDocument === 'string' ? connectedKeyOrDocument : getDocumentKey(connectedKeyOrDocument as Document);
 
   const document = findOperation(context, key);
 

@@ -1,13 +1,13 @@
 import { Document, KeyOrDocument, OperationContext } from '../types';
-import { getDocumentId } from '../utils/get-document-id';
+import { getDocumentKey } from '../utils/get-document-key';
 
 export function removeOperation(context: OperationContext, keyOrDocument: KeyOrDocument): Document {
   const { data } = context;
-  const key = getDocumentId(keyOrDocument);
+  const key = getDocumentKey(keyOrDocument);
 
   let document;
   Object.entries(data).forEach(([type, documents]) => {
-    const found = documents.find((document: Document) => getDocumentId(document) === key);
+    const found = documents.find((document: Document) => getDocumentKey(document) === key);
 
     if (found) {
       data[type] = documents.filter((document: Document) => document !== found);

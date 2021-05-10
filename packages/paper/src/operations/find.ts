@@ -1,10 +1,10 @@
 import { Document, KeyOrDocument, OperationContext } from '../types';
 import { findDocument } from '../utils/find-document';
-import { getDocumentId } from '../utils/get-document-id';
+import { getDocumentKey } from '../utils/get-document-key';
 
 export function findOperation(context: OperationContext, keyOrDocument: KeyOrDocument): Document | undefined {
   const { data } = context;
-  const key = getDocumentId(keyOrDocument);
+  const key = getDocumentKey(keyOrDocument);
   return findDocument(data, key);
 }
 

@@ -1,6 +1,6 @@
 import merge from 'lodash.merge';
 import { Document, DocumentPartial, KeyOrDocument, OperationContext } from '../types';
-import { getDocumentId } from '../utils/get-document-id';
+import { getDocumentKey } from '../utils/get-document-key';
 import { findOperation } from './find';
 
 export const putOperation = function putOperation(
@@ -8,7 +8,7 @@ export const putOperation = function putOperation(
   keyOrDocument: KeyOrDocument,
   documentPartial: DocumentPartial,
 ): Document {
-  const key = getDocumentId(keyOrDocument);
+  const key = getDocumentKey(keyOrDocument);
   const found = findOperation(context, key);
 
   if (!found) {

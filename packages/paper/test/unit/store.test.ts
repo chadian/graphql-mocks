@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Store } from '../../src/store';
-import { getDocumentId } from '../../src/utils/get-document-id';
+import { getDocumentKey } from '../../src/utils/get-document-key';
 import { getConnections } from '../../src/utils/get-connections';
 
 describe('mutation operations', () => {
@@ -20,7 +20,7 @@ describe('mutation operations', () => {
     const ronald = store.data.Person.find((person) => person.name === 'Ronald');
     expect(ronald?.name).to.equal('Ronald');
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(getDocumentId(ronald!)).not.to.be.null;
+    expect(getDocumentKey(ronald!)).not.to.be.null;
   });
 
   it('can find a document given a key within a mutation operation', async () => {
@@ -58,7 +58,7 @@ describe('mutation operations', () => {
     const june = store.data.Person.find((person) => person.name === 'June');
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(getConnections(ronald!).friend.has(getDocumentId(june!)!)).to.equal(true);
+    expect(getConnections(ronald!).friend.has(getDocumentKey(june!)!)).to.equal(true);
   });
 });
 
