@@ -1,5 +1,5 @@
 import { GraphQLSchema } from 'graphql';
-import { Patch, produce, setAutoFreeze, enablePatches } from 'immer';
+import { produce, setAutoFreeze } from 'immer';
 import { Subject } from 'rxjs';
 import { dispatch } from './events/dispatch';
 import { defaultOperations } from './operations/index';
@@ -33,10 +33,6 @@ import { scalarFieldValidator } from './validations/validators/scalar-field';
 // > must be represented faithfully
 // > https://exploringjs.com/deep-js/ch_proxies.html
 setAutoFreeze(false);
-
-// Capturing patches supports pulling changes from the DataStore so that
-// they can be reported as events
-enablePatches();
 
 export class Paper<UserOperations extends OperationMap = OperationMap> {
   history: DocumentStore[] = [];
@@ -95,29 +91,20 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     });
   }
 
-  private async dispatchEvents(changes: Patch[], previous: DocumentStore, store: DocumentStore) {
-    dispatch(changes, previous, store, this.events);
+  private async dispatchEvents(previous: DocumentStore, store: DocumentStore) {
+    dispatch(previous, store, this.events);
   }
 
   async mutate(fn: TransactionCallback<Paper['operations'] & UserOperations>): Promise<void> {
-    let changes: Patch[] = [];
-    const grabPatches = (patches: Patch[]) => {
-      changes = [...patches];
-    };
-
-    const next: DocumentStore = await produce(
-      this.current,
-      async (draft) => {
-        const schema = this.sourceGrapQLSchema;
-        const operations = this.operations;
-        const next = await transaction<typeof operations>(draft, schema, operations, fn);
-        return next;
-      },
-      grabPatches,
-    );
+    const next: DocumentStore = await produce(this.current, async (draft) => {
+      const schema = this.sourceGrapQLSchema;
+      const operations = this.operations;
+      const next = await transaction<typeof operations>(draft, schema, operations, fn);
+      return next;
+    });
 
     this.validate(next);
-    await this.dispatchEvents(changes, this.current, next);
+    await this.dispatchEvents(this.current, next);
     this.current = next;
     this.history.push(next);
   }

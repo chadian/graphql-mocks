@@ -5,6 +5,7 @@ import { buildSchema } from 'graphql';
 import { expect } from 'chai';
 import { getDocumentKey } from '../../src/utils/get-document-key';
 import { RemoveEvent } from '../../src/events/remove';
+import { ModifyEvent } from '../../src/events/modify-document';
 
 const schemaString = `
   schema {
@@ -169,17 +170,13 @@ describe('happy path', () => {
       expect(getDocumentKey(originalAccount)).to.equal(getDocumentKey(updatedAccount));
       expect(originalAccount.email).to.equal('windows95@aol.com');
       expect(updatedAccount.email).to.equal('beos@aol.com');
-      expect(events).to.have.lengthOf(2);
+      expect(events).to.have.lengthOf(1);
 
-      expect(events[0]?.name).to.equal('modify');
-      expect(events[0]?.property).to.equal('id');
-      expect(events[0]?.previousValue).to.equal('1');
-      expect(events[0]?.value).to.equal('5');
-
-      expect(events[1]?.name).to.equal('modify');
-      expect(events[1]?.property).to.equal('email');
-      expect(events[1]?.previousValue).to.equal('windows95@aol.com');
-      expect(events[1]?.value).to.equal('beos@aol.com');
+      const [event] = events;
+      expect((event as ModifyEvent).document.id).to.equal('5');
+      expect((event as ModifyEvent).document.email).to.equal('beos@aol.com');
+      expect((event as ModifyEvent).changes.id.value).to.equal('5');
+      expect((event as ModifyEvent).changes.id.previousValue).to.equal('1');
     });
 
     it('supports promises within a mutate transaction', async () => {

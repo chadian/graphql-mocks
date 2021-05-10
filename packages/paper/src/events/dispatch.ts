@@ -1,130 +1,90 @@
-import { Patch } from 'immer';
 import { Subject } from 'rxjs';
 import { Document, DocumentStore, PaperEvent } from '../types';
+import { allDocuments } from '../utils/all-documents';
 import { findDocument } from '../utils/find-document';
 import { getDocumentKey } from '../utils/get-document-key';
 import { AddEvent } from './add';
-import { ModifyEvent } from './modify';
 import { RemoveEvent } from './remove';
+import { diff as compareObjects } from 'just-diff';
+import { ModifyEvent } from './modify-document';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function get(subject: any, path: (string | number)[]): any {
-  const pathCopy = [...path];
-  const prop = pathCopy.shift();
+export type DocumentModifiedChange = {
+  propertyName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  previousValue: any;
+};
 
-  if (prop === undefined) {
-    return subject;
-  }
+export type DocumentModifiedChangeMap = {
+  [propertyName: string]: DocumentModifiedChange;
+};
 
-  return get(subject[prop], pathCopy);
+type AddRemoveEventChanges = {
+  added: { document: Document }[];
+  removed: { document: Document }[];
+  modified: {
+    document: Document;
+    changes: {
+      [propertyName: string]: DocumentModifiedChange;
+    };
+  }[];
+};
+
+function diffStores(current: DocumentStore, previous: DocumentStore): AddRemoveEventChanges {
+  const currentKeys = allDocuments(current).map((document) => getDocumentKey(document));
+  const previousKeys = allDocuments(previous).map((document) => getDocumentKey(document));
+
+  const added = currentKeys.filter((key) => !previousKeys.includes(key));
+  const removed = previousKeys.filter((key) => !currentKeys.includes(key));
+
+  const modified = currentKeys
+    .filter((key) => !added.includes(key))
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    .map((key) => ({ current: findDocument(current, key)!, previous: findDocument(previous, key)! }))
+    .map(({ current, previous }) => {
+      const differences = compareObjects(current, previous);
+      const changes = differences.reduce((documentChange, { path }) => {
+        const [property] = path;
+
+        documentChange[property] = {
+          propertyName: property.toString(),
+          value: current[property],
+          previousValue: previous[property],
+        };
+
+        return documentChange;
+      }, {} as DocumentModifiedChangeMap);
+
+      const hasChanges = Object.keys(changes).length > 0;
+      return hasChanges ? { document: current, changes } : undefined;
+    })
+    .filter(Boolean) as AddRemoveEventChanges['modified'];
+
+  return {
+    added: added.map((key) => ({
+      document: findDocument(current, key) as Document,
+    })),
+    removed: removed.map((key) => ({
+      document: findDocument(previous, key) as Document,
+    })),
+    modified,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function dispatch(
-  changes: Patch[],
-  previous: DocumentStore,
-  store: DocumentStore,
-  eventSubject: Subject<PaperEvent>,
-) {
-  changes;
+export async function dispatch(previous: DocumentStore, store: DocumentStore, eventSubject: Subject<PaperEvent>) {
   previous;
   store;
   eventSubject;
 
-  const dispatchAdded = (change: Patch, document: Document) =>
-    eventSubject.next(new AddEvent({ document, change, store }));
+  const dispatchAdded = (document: Document) => eventSubject.next(new AddEvent({ document, store }));
+  const dispatchRemoved = (document: Document) => eventSubject.next(new RemoveEvent({ document, store }));
+  const dispatchModified = (changes: DocumentModifiedChangeMap, document: Document) =>
+    eventSubject.next(new ModifyEvent({ document, store, changes }));
 
-  const dispatchRemoved = (change: Patch, document: Document) =>
-    eventSubject.next(new RemoveEvent({ document, change, store }));
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dispatchModify = (change: Patch, document: Document, property: string, value: any, previousValue: any) =>
-    eventSubject.next(new ModifyEvent({ change, store, document, property, value, previousValue }));
-
-  const throwUnhandledChange = (change: Patch): void => {
-    const value = JSON.stringify(change.value);
-    const error = new Error(
-      `Unhandled change:\noperation: ${change.op}\npath: ${change.path.join(', ')}, value: ${value}`,
-    );
-
-    eventSubject.error(error);
-  };
-
-  changes.forEach((change) => {
-    // Note: ops don't map one-to-one to document/document store changes
-    // For example, a `replace` op might contain additions or removals
-    // since it's a new array, referentially, the array been "replaced"
-    // So a replacement has to be manually checked for what's changed
-    // Using the patch from immer is still useful in narrowing down the
-    // location of what has changed
-    switch (change.op) {
-      case 'add': {
-        // new array of documents added
-        if (change.path.length === 1) {
-          change.value.forEach((document: Document) => dispatchAdded(change, document));
-          break;
-        }
-
-        // specific document added at index
-        if (change.path.length === 2) {
-          const [type, index] = change.path;
-          const document = get(store, [type, index]) as Document;
-          dispatchAdded(change, document);
-          break;
-        }
-
-        throwUnhandledChange(change);
-        break;
-      }
-
-      case 'replace': {
-        // document array on type changed, have to determine changes manually
-        if (change.path.length === 1) {
-          const [type] = change.path;
-          const previousStoredKeys: string[] = (previous[type] ?? []).map((doc: Document) => getDocumentKey(doc));
-          const currentStoredKeys: string[] = (store[type] ?? []).map((doc: Document) => getDocumentKey(doc));
-
-          const added = currentStoredKeys.filter((key) => !previousStoredKeys.includes(key));
-          const removed = previousStoredKeys.filter((key) => !currentStoredKeys.includes(key));
-
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          added.forEach((key) => dispatchAdded(change, findDocument(store, key)!));
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          removed.forEach((key) => dispatchRemoved(change, findDocument(previous, key)!));
-          break;
-        }
-
-        // specific property on a document changed
-        if (change.path.length === 3) {
-          const [type, index, property] = change.path;
-          const document = get(store, [type, index]);
-          const value = get(store, [type, index, property]);
-          const previousValue = findDocument(previous, document)?.[property];
-          dispatchModify(change, document, property.toString(), value, previousValue);
-          break;
-        }
-
-        throwUnhandledChange(change);
-        break;
-      }
-
-      default: {
-        throwUnhandledChange(change);
-        break;
-      }
-    }
-
-    //   console.log(change);
-    //   const [type, index] = change.path;
-    //   const document = get(change.value, [type, index]);
-    //   console.log(document);
-    // } else if (documentChanged) {
-    //   const [type, index, changedProp] = change.path;
-    //   const document = get(change.value, [type, index]);
-    //   const changedPropValue = get(change.value, [type, index, changedProp]);
-    //   console.log(document, changedPropValue);
-    // } else if (documentRemoved) {
-    //   console.log('document removed');
-    // }
-  });
+  const { added, removed, modified } = diffStores(store, previous);
+  added.forEach(({ document }) => dispatchAdded(document));
+  removed.forEach(({ document }) => dispatchRemoved(document));
+  modified.forEach(({ changes, document }) => dispatchModified(changes, document));
 }
