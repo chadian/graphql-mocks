@@ -8,23 +8,21 @@ import {
   isObjectType,
   isScalarType,
 } from 'graphql';
-import { Document } from '../types';
+import { DataStore, Document } from '../types';
 import { getConnections } from '../utils/get-connections';
 import { extractListType } from '../utils/graphql/extract-list-type';
-import { typeExists } from '../utils/graphql/type-exists';
+import { FieldCannotConnectMultiple } from './errors/field-cannot-connect-multiple';
 import { FieldDoesNotExistOnType } from './errors/field-does-not-exist-on-type';
 import { FieldDuplicateWithConnection } from './errors/field-duplicate-with-connection';
 import { FieldReturnTypeMismatch } from './errors/field-return-type-mismatch';
-import { TypeDoesNotExist } from './errors/type-does-not-exist';
-import { TypeIsNotDocumentCompatible } from './errors/type-is-not-document-compatible';
 
-type Options = { graphqlSchema: GraphQLSchema; typename: string; document: Document };
+type Options = { data: DataStore; graphqlSchema: GraphQLSchema; type: GraphQLObjectType; document: Document };
 
 interface FieldValidator {
   /**
    * Skip when the field is represented by a connected value on the document
    */
-  skipConnectedValue: boolean;
+  skipConnectionValue: boolean;
 
   /**
    * Skip when the field is represented by a null or undefined value on the document
@@ -40,6 +38,9 @@ interface FieldValidator {
     fieldName: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fieldValue: any;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    connectionValue: any[] | undefined;
   }): void;
 }
 
@@ -49,11 +50,12 @@ interface DocumentTypeValidator {
     type: GraphQLObjectType<any>;
     document: Document;
     graphqlSchema: GraphQLSchema;
+    data: DataStore;
   }): void;
 }
 
 const objectFieldValidator: FieldValidator = {
-  skipConnectedValue: true,
+  skipConnectionValue: true,
   skipNullValue: true,
   validate({ field, fieldValue }) {
     if (isObjectType(field.type) && typeof fieldValue !== 'object') {
@@ -67,7 +69,7 @@ const objectFieldValidator: FieldValidator = {
 };
 
 const scalarFieldValidator: FieldValidator = {
-  skipConnectedValue: false,
+  skipConnectionValue: false,
   skipNullValue: true,
   validate({ field, fieldValue }) {
     const jsScalars = ['boolean', 'number', 'string'];
@@ -82,7 +84,7 @@ const scalarFieldValidator: FieldValidator = {
 };
 
 const listFieldValidator: FieldValidator = {
-  skipConnectedValue: true,
+  skipConnectionValue: true,
   skipNullValue: true,
   validate({ field, fieldValue }) {
     if (isListType(field.type)) {
@@ -110,11 +112,11 @@ const listFieldValidator: FieldValidator = {
 };
 
 const nonNullFieldValidator: FieldValidator = {
-  skipConnectedValue: true,
+  skipConnectionValue: false,
   skipNullValue: false,
-  validate({ field, fieldValue }) {
+  validate({ field, fieldValue, connectionValue }) {
     if (isNonNullType(field.type)) {
-      if (fieldValue == null) {
+      if (fieldValue == null && connectionValue == null) {
         throw new FieldReturnTypeMismatch({
           field: field,
           expected: 'non-null',
@@ -126,7 +128,7 @@ const nonNullFieldValidator: FieldValidator = {
 };
 
 const fieldValueAndConnectionValueValidator: FieldValidator = {
-  skipConnectedValue: false,
+  skipConnectionValue: false,
   skipNullValue: false,
   validate({ type, fieldName, fieldValue, document }) {
     const documentConnections = getConnections(document);
@@ -134,6 +136,16 @@ const fieldValueAndConnectionValueValidator: FieldValidator = {
     const hasFieldValueAndConnectionValue = fieldValue && connectionFieldValue;
     if (hasFieldValueAndConnectionValue) {
       throw new FieldDuplicateWithConnection({ type, fieldName });
+    }
+  },
+};
+
+const fieldValueMultipleConnectionsForNonListValidator: FieldValidator = {
+  skipConnectionValue: false,
+  skipNullValue: false,
+  validate({ connectionValue, type, field }) {
+    if (!extractListType(field.type) && connectionValue && connectionValue?.length > 1) {
+      throw new FieldCannotConnectMultiple({ type, field });
     }
   },
 };
@@ -150,45 +162,37 @@ const documentOnlyHasFieldsOnTypeValidator: DocumentTypeValidator = {
   },
 };
 
-export function graphqlTypeCheck({ graphqlSchema, typename, document }: Options): void {
-  if (!typeExists(graphqlSchema, typename)) {
-    throw new TypeDoesNotExist({ typename });
-  }
+export const graphqlTypeCheck: DocumentTypeValidator = {
+  validate({ data, graphqlSchema, type, document }: Options): void {
+    documentOnlyHasFieldsOnTypeValidator.validate({ data, document, type, graphqlSchema });
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const type = graphqlSchema.getType(typename)!;
+    const graphqlTypeFields = type.getFields();
 
-  if (!isObjectType(type)) {
-    throw new TypeIsNotDocumentCompatible({ type });
-  }
+    for (const fieldName in graphqlTypeFields) {
+      const field = graphqlTypeFields[fieldName];
+      const fieldValue = document[fieldName];
+      const connectionValue = getConnections(document)[fieldName];
 
-  documentOnlyHasFieldsOnTypeValidator.validate({ document, type, graphqlSchema });
+      const fieldValidators = [
+        fieldValueAndConnectionValueValidator,
+        objectFieldValidator,
+        scalarFieldValidator,
+        listFieldValidator,
+        nonNullFieldValidator,
+        fieldValueMultipleConnectionsForNonListValidator,
+      ];
 
-  const graphqlTypeFields = type.getFields();
+      fieldValidators.forEach((validator) => {
+        if (validator.skipConnectionValue && connectionValue) {
+          return;
+        }
 
-  for (const fieldName in graphqlTypeFields) {
-    const field = graphqlTypeFields[fieldName];
-    const fieldValue = document[fieldName];
-    const hasConnectedValue = getConnections(document)[fieldName];
+        if (validator.skipNullValue && fieldValue == null) {
+          return;
+        }
 
-    const fieldValidators = [
-      fieldValueAndConnectionValueValidator,
-      objectFieldValidator,
-      scalarFieldValidator,
-      listFieldValidator,
-      nonNullFieldValidator,
-    ];
-
-    fieldValidators.forEach((validator) => {
-      if (validator.skipConnectedValue && hasConnectedValue) {
-        return;
-      }
-
-      if (validator.skipNullValue && fieldValue == null) {
-        return;
-      }
-
-      validator.validate({ type, field, document, fieldName: field.name, fieldValue });
-    });
-  }
-}
+        validator.validate({ type, field, document, fieldName: field.name, fieldValue, connectionValue });
+      });
+    }
+  },
+};

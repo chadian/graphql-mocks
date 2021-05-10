@@ -1,4 +1,4 @@
-import { buildSchema } from 'graphql';
+import { buildSchema, GraphQLObjectType } from 'graphql';
 import { createDocument } from '../../../src/utils/create-document';
 import { graphqlTypeCheck } from '../../../src/validations/graphql-type-check';
 import { expect } from 'chai';
@@ -29,22 +29,22 @@ function buildTestSchema(personTypeSchema = 'name: String') {
 }
 
 describe('graphql-type-check', () => {
-  it('throws if graphql type does not exist in the schema', () => {
-    const graphqlSchema = buildTestSchema();
-    const document = createDocument('Person', {});
-    expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'NotATypeInTheSchema' })).to.throw(
-      'The type "NotATypeInTheSchema" does not exist in the the graphql schema.',
-    );
-  });
+  // it('throws if graphql type does not exist in the schema', () => {
+  //   const graphqlSchema = buildTestSchema();
+  //   const document = createDocument('Person', {});
+  //   expect(() => graphqlTypeCheck.validate({ data: {}, graphqlSchema, document, typename: 'NotATypeInTheSchema' })).to.throw(
+  //     'The type "NotATypeInTheSchema" does not exist in the the graphql schema.',
+  //   );
+  // });
 
-  it('throws if the graphql type is not an object type', () => {
-    const graphqlSchema = buildTestSchema();
-    const document = createDocument('Person', {});
+  // it('throws if the graphql type is not an object type', () => {
+  //   const graphqlSchema = buildTestSchema();
+  //   const document = createDocument('Person', {});
 
-    expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Food' })).to.throw(
-      'The type "Food" is a EnumTypeDefinition but cannot be represented by a document',
-    );
-  });
+  //   expect(() => graphqlTypeCheck.validate({ data: {}, graphqlSchema, document, typename: 'Food' })).to.throw(
+  //     'The type "Food" is a EnumTypeDefinition but cannot be represented by a document',
+  //   );
+  // });
 
   it('throws if the document has a field that does not exist on the graphql type', () => {
     const graphqlSchema = buildTestSchema(`
@@ -56,9 +56,14 @@ describe('graphql-type-check', () => {
       age: 25,
     });
 
-    expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
-      'The field "age" does not exist on the type Person.',
-    );
+    expect(() =>
+      graphqlTypeCheck.validate({
+        data: {},
+        graphqlSchema,
+        document,
+        type: graphqlSchema.getType('Person') as GraphQLObjectType,
+      }),
+    ).to.throw('The field "age" does not exist on the type Person.');
   });
 
   context('connections', () => {
@@ -73,7 +78,14 @@ describe('graphql-type-check', () => {
 
       connectDocument(document, 'bestFriend', createDocument('Person', { name: 'Larry' }));
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "bestFriend" on Person cannot be represented by both a Document connection and javascript value',
       );
     });
@@ -85,7 +97,14 @@ describe('graphql-type-check', () => {
 
       const document = createDocument('Person', {});
       connectDocument(document, 'bestFriend', createDocument('Person', { name: 'Larry' }));
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.not.throw();
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.not.throw();
     });
   });
 
@@ -99,7 +118,14 @@ describe('graphql-type-check', () => {
         bestFriend: 'This is a string but should be a Person object',
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "bestFriend" represents a graphql "Person" type and on the document should be a object, but got string',
       );
     });
@@ -113,7 +139,14 @@ describe('graphql-type-check', () => {
         friends: 'Not an Array, `friends` should be an array to match the graphql List type',
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "friends" represents a graphql "[Person!]" type and on the document should be a Array, but got string',
       );
     });
@@ -127,7 +160,14 @@ describe('graphql-type-check', () => {
         friends: [{ name: 'Larry' }, null],
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "friends" represents a graphql "[Person!]" type and on the document should be a non-null list, but got null in the array',
       );
     });
@@ -141,7 +181,14 @@ describe('graphql-type-check', () => {
         friends: null,
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "friends" represents a graphql "[Person]! (non-null)" type and on the document should be a non-null, but got null',
       );
     });
@@ -157,7 +204,14 @@ describe('graphql-type-check', () => {
         },
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "donutsEaten" represents a graphql "Int" type and on the document should be a boolean, number, string, but got object',
       );
     });
@@ -171,7 +225,14 @@ describe('graphql-type-check', () => {
         name: null,
       });
 
-      expect(() => graphqlTypeCheck({ graphqlSchema, document, typename: 'Person' })).to.throw(
+      expect(() =>
+        graphqlTypeCheck.validate({
+          data: {},
+          graphqlSchema,
+          document,
+          type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        }),
+      ).to.throw(
         'The field "name" represents a graphql "String! (non-null)" type and on the document should be a non-null, but got null',
       );
     });
