@@ -4,7 +4,7 @@ import { createDocument } from '../utils/create-document';
 export function addOperation(context: OperationContext, typename: string, documentPartial: DocumentPartial): Document {
   const { data } = context;
   data[typename] = data[typename] || [];
-  const document = createDocument(documentPartial);
+  const document = createDocument(typename, documentPartial);
   data[typename].push(document);
 
   return document;

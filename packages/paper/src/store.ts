@@ -1,9 +1,17 @@
 import { produce, setAutoFreeze } from 'immer';
 import { proxyWrap } from './utils/proxy-wrap';
 import { transaction } from './transaction';
-import { DataStore, TransactionCallback, ContextualOperationMap, DefaultContextualOperations } from './types';
+import {
+  DataStore,
+  TransactionCallback,
+  ContextualOperationMap,
+  DefaultContextualOperations,
+  Document,
+  KeyOrDocument,
+} from './types';
 import { graphqlCheck } from './validations/graphql-check';
 import { GraphQLSchema } from 'graphql';
+import { findDocument } from './utils/find-document';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -23,6 +31,22 @@ export class Store {
 
   get data(): DataStore {
     return proxyWrap(this, this.current);
+  }
+
+  findDocument(documentOrKey: KeyOrDocument): Document | undefined {
+    return findDocument(this.current, documentOrKey);
+  }
+
+  find(typename: string, findFunction: (doc: Document) => boolean): Document | undefined {
+    const typeStore = this.current[typename] ?? [];
+
+    return typeStore.find((document) => {
+      const frozen = Object.freeze({
+        ...document,
+      });
+
+      return findFunction(frozen);
+    });
   }
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(

@@ -1,10 +1,11 @@
-import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL } from './constants';
+import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL, DOCUMENT_GRAPHQL_TYPENAME } from './constants';
 
 export { DefaultContextualOperations } from './operations/types';
 
 // documents
 
 export type DocumentKey = string;
+export type GraphQLTypeName = string;
 export type KeyOrDocument = DocumentKey | Document;
 
 export type Document = {
@@ -12,6 +13,7 @@ export type Document = {
   [k: string]: any;
   [DOCUMENT_KEY_SYMBOL]: DocumentKey;
   [DOCUMENT_CONNECTIONS_SYMBOL]: ConnectionsMap;
+  [DOCUMENT_GRAPHQL_TYPENAME]: GraphQLTypeName;
 };
 
 export type DocumentPartial = Partial<Document>;

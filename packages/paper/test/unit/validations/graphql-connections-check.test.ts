@@ -32,7 +32,7 @@ function buildTestSchema(personFields?: string) {
 
 describe('graphql-connections-check', () => {
   it('throws if graphql type does not exist in the schema', () => {
-    const document = createDocument({});
+    const document = createDocument('Person', {});
     const graphqlSchema = buildTestSchema();
 
     expect(() =>
@@ -46,7 +46,7 @@ describe('graphql-connections-check', () => {
   });
 
   it('throws if the graphql type is not an object type', () => {
-    const document = createDocument({});
+    const document = createDocument('Person', {});
 
     const graphqlSchema = buildTestSchema();
     expect(() => graphqlConnectionsCheck({ data: {}, graphqlSchema, document, typename: 'Food' })).to.throw(
@@ -57,7 +57,7 @@ describe('graphql-connections-check', () => {
   it('throws when a non-null field does not have a document value or connection value', () => {
     const graphqlSchema = buildTestSchema(`bestFriend: Person!`);
 
-    const document = createDocument({});
+    const document = createDocument('Person', {});
 
     expect(() => graphqlConnectionsCheck({ data: {}, graphqlSchema, document, typename: 'Person' })).to.throw(
       'The field "bestFriend" represents a graphql "Person! (non-null)" type and on the document should be a non-null Person, but got undefined or null',
@@ -67,15 +67,15 @@ describe('graphql-connections-check', () => {
   it('throws when multiple connections exist for a non-list singular connection', () => {
     const graphqlSchema = buildTestSchema(`bestFriend: Person!`);
 
-    const steve = createDocument({
+    const steve = createDocument('Person', {
       name: 'Steve Prefontaine',
     });
 
-    const bill = createDocument({
+    const bill = createDocument('Person', {
       name: 'Bill Bowerman',
     });
 
-    const phil = createDocument({
+    const phil = createDocument('Person', {
       name: 'Phil Knight',
     });
 
