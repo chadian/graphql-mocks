@@ -4,8 +4,6 @@ import { transaction } from './transaction';
 import {
   DocumentStore,
   TransactionCallback,
-  ContextualOperationMap,
-  DefaultContextualOperations,
   Document,
   KeyOrDocument,
   DocumentTypeValidator,
@@ -23,6 +21,7 @@ import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
 import { createDocumentStore } from './utils/create-document-store';
+import { defaultOperations } from './operations/index';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -43,6 +42,8 @@ export class Paper {
     objectFieldValidator,
     scalarFieldValidator,
   ];
+
+  operations = defaultOperations;
 
   private sourceGrapQLSchema: GraphQLSchema;
 
@@ -79,11 +80,12 @@ export class Paper {
     });
   }
 
-  async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
-    fn: TransactionCallback<T>,
-  ): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const next: DocumentStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
+  async mutate(fn: TransactionCallback<Paper['operations']>): Promise<void> {
+    const next: DocumentStore = produce(this.current, (draft) => {
+      const schema = this.sourceGrapQLSchema;
+      const operations = this.operations;
+      return transaction<typeof operations>(draft, schema, operations, fn);
+    });
 
     this.validate(next);
     this.current = next;

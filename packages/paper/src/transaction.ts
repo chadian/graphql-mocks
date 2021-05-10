@@ -1,28 +1,21 @@
-import { addOperation } from './operations/add';
-import { putOperation } from './operations/put';
-import { findOperation } from './operations/find';
-import { connectOperation } from './operations/connect';
-import { removeOperation } from './operations/remove';
-import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
-import { DocumentStore, TransactionCallback } from './types';
+import { BoundOperationMap, DocumentStore, Operation, OperationMap, TransactionCallback } from './types';
 import { GraphQLSchema } from 'graphql';
-import { getNullDocumentOperation } from './operations/get-null-document';
 
-export function transaction(draft: DocumentStore, schema: GraphQLSchema, fn: TransactionCallback): DocumentStore {
+export function transaction<T extends OperationMap>(
+  draft: DocumentStore,
+  schema: GraphQLSchema,
+  contextualOperations: T,
+  fn: TransactionCallback<T>,
+): DocumentStore {
   const context = { schema, store: draft };
 
-  // operations
-  const add = addOperation.bind(null, context);
-  const put = putOperation.bind(null, context);
-  const find = findOperation.bind(null, context);
-  const connect = connectOperation.bind(null, context);
-  const remove = removeOperation.bind(null, context);
-  const getDocumentsForType = getDocumentsForTypeOperation.bind(null, context);
-  const getNullDocument = getNullDocumentOperation.bind(null, context);
+  const boundOperations: BoundOperationMap<T> = {} as BoundOperationMap<T>;
+  for (const key in contextualOperations) {
+    const fn = contextualOperations[key] as Operation;
+    boundOperations[key] = fn.bind(null, context) as BoundOperationMap<T>[typeof key];
+  }
 
-  // provide functions to make changes with bound context
-  fn({ add, put, find, remove, connect, getDocumentsForType, getNullDocument });
+  fn(boundOperations);
 
-  // return the changes
   return draft;
 }

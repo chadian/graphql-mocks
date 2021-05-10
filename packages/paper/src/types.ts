@@ -48,18 +48,21 @@ export interface Operation {
   (context: OperationContext, ...operationArgs: any[]): any;
 }
 
+export interface OperationMap {
+  [key: string]: Operation;
+}
+
 // transaction
 
-// this is after context arg has been bound to the Operation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ContextualOperation = (...operationArgs: any[]) => any;
+type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
 
-export type ContextualOperationMap = {
-  [key: string]: ContextualOperation;
+export type BoundOperationMap<T extends OperationMap> = {
+  [P in keyof T]: OmitFirstArg<T[P]>;
 };
 
-export interface TransactionCallback<T extends ContextualOperationMap = ContextualOperationMap> {
-  (operations: T): void;
+export interface TransactionCallback<T extends OperationMap> {
+  (operations: BoundOperationMap<T>): void;
 }
 
 // validators
