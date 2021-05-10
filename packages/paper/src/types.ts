@@ -1,4 +1,4 @@
-import { GraphQLSchema } from 'graphql';
+import { GraphQLField, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL, DOCUMENT_GRAPHQL_TYPENAME } from './constants';
 
 export { DefaultContextualOperations } from './operations/types';
@@ -52,4 +52,43 @@ export type ContextualOperationMap = {
 
 export interface TransactionCallback<T extends ContextualOperationMap = ContextualOperationMap> {
   (operations: T): void;
+}
+
+// validators
+
+export interface FieldValidator {
+  /**
+   * Skip when the field is represented by a connected value on the document
+   */
+  skipConnectionValue: boolean;
+
+  /**
+   * Skip when the field is represented by a null or undefined value on the document
+   */
+  skipNullValue: boolean;
+
+  validate(parts: {
+    graphqlSchema: GraphQLSchema;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: GraphQLObjectType<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: GraphQLField<any, any>;
+    document: Document;
+    fieldName: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fieldValue: any;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    connectionValue: any[] | undefined;
+  }): void;
+}
+
+export interface DocumentTypeValidator {
+  validate(parts: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: GraphQLObjectType<any>;
+    document: Document;
+    graphqlSchema: GraphQLSchema;
+    data: DataStore;
+  }): void;
 }

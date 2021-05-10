@@ -8,11 +8,20 @@ import {
   DefaultContextualOperations,
   Document,
   KeyOrDocument,
+  DocumentTypeValidator,
+  FieldValidator,
 } from './types';
-import { graphqlCheck } from './validations/graphql-check';
 import { GraphQLSchema } from 'graphql';
 import { findDocument } from './utils/find-document';
 import { isDocument } from './utils/is-document';
+import { validate } from './validations/validate';
+import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
+import { exclusiveFieldOrConnectionValueForfield } from './validations/validators/exclusive-field-or-connection-value';
+import { listFieldValidator } from './validations/validators/list-field';
+import { multipleConnectionsForNonListField } from './validations/validators/multiple-connections-for-non-list-field';
+import { nonNullFieldValidator } from './validations/validators/non-null-field';
+import { objectFieldValidator } from './validations/validators/object-field';
+import { scalarFieldValidator } from './validations/validators/scalar-field';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -24,6 +33,16 @@ setAutoFreeze(false);
 export class Store {
   history: DataStore[] = [];
   current: DataStore = {};
+  documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
+  fieldValidators: FieldValidator[] = [
+    exclusiveFieldOrConnectionValueForfield,
+    listFieldValidator,
+    multipleConnectionsForNonListField,
+    nonNullFieldValidator,
+    objectFieldValidator,
+    scalarFieldValidator,
+  ];
+
   private sourceGrapQLSchema: GraphQLSchema;
 
   constructor(graphqlSchema: GraphQLSchema) {
@@ -45,13 +64,24 @@ export class Store {
     return isDocument(result) ? proxyWrap(this, result) : result;
   }
 
+  validate(_store?: DataStore): void {
+    const store = _store ?? this.current;
+
+    Object.values(store).forEach((documents) => {
+      documents.forEach((document: Document) => {
+        validate(this.sourceGrapQLSchema, document, store, {
+          document: this.documentValidators,
+          field: this.fieldValidators,
+        });
+      });
+    });
+  }
+
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
     fn: TransactionCallback<T>,
   ): Promise<Store> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const next: DataStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
-
-    graphqlCheck(next, this.sourceGrapQLSchema);
 
     this.history.push(next);
     this.current = next;
