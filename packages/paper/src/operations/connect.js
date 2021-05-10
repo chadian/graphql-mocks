@@ -1,5 +1,5 @@
-const { CONNECTION_KEY_SYMBOL } = require('../constants');
-const { findOperation } = require('./find');
+import { CONNECTION_KEY_SYMBOL } from '../constants';
+import { findOperation } from './find';
 
 function connectOperation(context, [keyOne, fieldOne], [keyTwo, inverseField]) {
   const document = findOperation(context, keyOne);

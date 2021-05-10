@@ -1,5 +1,5 @@
-const { allDocuments } = require('../utils/all-documents');
-const { getDocumentId } = require('../utils/get-document-id');
+import { allDocuments } from '../utils/all-documents';
+import { getDocumentId } from '../utils/get-document-id';
 
 function findDocument(data, key) {
   const all = allDocuments(data);

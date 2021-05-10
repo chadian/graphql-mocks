@@ -1,4 +1,4 @@
-const { findDocument } = require('../utils/find-document');
+import { findDocument } from '../utils/find-document';
 
 function findOperation(context, id) {
   const {data} = context;

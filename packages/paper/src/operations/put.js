@@ -1,4 +1,4 @@
-const merge = require('lodash.merge');
+import merge from 'lodash.merge';
 
 function putOperation(context, id, document) {
   const found = findOperation(context, id);

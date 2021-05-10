@@ -1,6 +1,6 @@
-const { Store } = require('./store');
-const { getDocumentId } = require('./utils/get-document-id');
-const { getConnections } = require('./utils/get-connections');
+import { Store } from './store';
+import { getDocumentId } from './utils/get-document-id';
+import { getConnections } from './utils/get-connections';
 
 let store;
 

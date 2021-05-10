@@ -1,6 +1,6 @@
-const { produce, setAutoFreeze } = require('immer');
-const { proxyWrap } = require('./utils/proxy-wrap');
-const { transaction } = require('./transaction');
+import { produce, setAutoFreeze } from 'immer';
+import { proxyWrap } from './utils/proxy-wrap';
+import { transaction } from './transaction';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:

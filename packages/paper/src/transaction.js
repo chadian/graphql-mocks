@@ -1,9 +1,9 @@
-const { addOperation } = require('./operations/add');
-const { putOperation } = require('./operations/put');
-const { findOperation } = require('./operations/find');
-const { connectOperation } = require('./operations/connect');
-const { removeOperation } = require('./operations/remove');
-const { getDocumentsForTypeOperation } = require('./operations/get-documents-for-type')
+import { addOperation } from './operations/add';
+import { putOperation } from './operations/put';
+import { findOperation } from './operations/find';
+import { connectOperation } from './operations/connect';
+import { removeOperation } from './operations/remove';
+import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
 
 function transaction(draft, fn) {
   const context = {data: draft};

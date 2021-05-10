@@ -1,5 +1,5 @@
-const { getConnections } = require('../utils/get-connections');
-const { findDocument } = require('./find-document');
+import { getConnections } from '../utils/get-connections';
+import { findDocument } from './find-document';
 
 function proxyWrap(store, target) {
   return new Proxy(target, {

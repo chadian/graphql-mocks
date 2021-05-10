@@ -1,4 +1,4 @@
-const { CONNECTION_KEY_SYMBOL } = require('../constants');
+import { CONNECTION_KEY_SYMBOL } from '../constants';
 
 function getConnections(document) {
   return document[CONNECTION_KEY_SYMBOL];

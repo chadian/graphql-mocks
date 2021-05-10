@@ -1,4 +1,4 @@
-const { getDocumentId } = require('../utils/get-document-id');
+import { getDocumentId } from '../utils/get-document-id';
 
 function removeOperation(context, id) {
   const {data} = context;

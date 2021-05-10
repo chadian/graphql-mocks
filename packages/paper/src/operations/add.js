@@ -1,5 +1,5 @@
-const { generateDocumentKey } = require("../utils/generate-document-key");
-const { DOCUMENT_ID_SYMBOL } = require('../constants');
+import { generateDocumentKey } from '../utils/generate-document-key';
+import { DOCUMENT_ID_SYMBOL } from '../constants';
 
 function addOperation(context, type, document) {
   const {data} = context;
