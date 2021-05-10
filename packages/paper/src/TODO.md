@@ -2,10 +2,10 @@
 
 ## TODO
 
+- [ ] initialize store for known graphql types from schema
 - [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface
-- [ ] unique ID field validator
 - [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
@@ -24,3 +24,4 @@
 - [X] Make reads to the store sync
 - [X] Allow `null` or a Null Document to be added for connections
 - [X] Capture events from transaction
+- [X] unique ID field validator

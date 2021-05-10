@@ -302,7 +302,7 @@ describe('happy path', () => {
       try {
         await paper.mutate(({ create }) => {
           create('Account', {
-            id: '1',
+            id: '2',
             email: null,
           });
         });

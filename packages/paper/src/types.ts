@@ -91,6 +91,7 @@ export interface FieldValidator {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fieldConnections: Connections | undefined;
+    store: DocumentStore;
   }): void;
 }
 

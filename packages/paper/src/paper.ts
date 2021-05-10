@@ -26,6 +26,7 @@ import { multipleConnectionsForNonListField } from './validations/validators/mul
 import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
+import { uniqueIdFieldValidator } from './validations/validators/unique-id';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -46,6 +47,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     nonNullFieldValidator,
     objectFieldValidator,
     scalarFieldValidator,
+    uniqueIdFieldValidator,
   ];
 
   operations: typeof defaultOperations & UserOperations;

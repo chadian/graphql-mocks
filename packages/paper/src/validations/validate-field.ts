@@ -5,7 +5,7 @@ export const validateField: (fieldValidators: FieldValidator[]) => DocumentTypeV
   fieldValidators: FieldValidator[],
 ) => {
   return {
-    validate({ graphqlSchema, type, document }) {
+    validate({ graphqlSchema, type, document, store }) {
       const graphqlTypeFields = type.getFields();
 
       for (const fieldName in graphqlTypeFields) {
@@ -30,6 +30,7 @@ export const validateField: (fieldValidators: FieldValidator[]) => DocumentTypeV
             fieldValue,
             fieldConnections: connectionValue,
             graphqlSchema,
+            store,
           });
         });
       }

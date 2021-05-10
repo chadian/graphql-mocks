@@ -1,6 +1,7 @@
 import { buildSchema, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { FieldValidator } from '../../../src/types';
 import { createDocument } from '../../../src/utils/create-document';
+import { createDocumentStore } from '../../../src/utils/create-document-store';
 import { getConnections } from '../../../src/utils/get-connections';
 
 export function buildTestSchema(personFields?: string): GraphQLSchema {
@@ -36,6 +37,7 @@ export const createMockFieldValidatorOptions = (
   const type = options.type ?? (schema.getType('Person') as GraphQLObjectType);
   const field = options.field ?? type.getFields()[options.fieldName];
   const document = options.document ?? createDocument(type.name, {});
+  const store = options.store ?? createDocumentStore();
 
   return {
     graphqlSchema: schema,
@@ -45,5 +47,6 @@ export const createMockFieldValidatorOptions = (
     fieldName: options.fieldName,
     fieldValue: document[field.name],
     fieldConnections: getConnections(document)[field.name],
+    store,
   };
 };
