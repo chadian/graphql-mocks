@@ -1,4 +1,4 @@
-import { CONNECTION_KEY_SYMBOL, DOCUMENT_ID_SYMBOL } from './constants';
+import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL } from './constants';
 
 export { DefaultContextualOperations } from './operations/types';
 
@@ -10,8 +10,8 @@ export type KeyOrDocument = DocumentKey | Document;
 export type Document = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [k: string]: any;
-  [DOCUMENT_ID_SYMBOL]: DocumentKey;
-  [CONNECTION_KEY_SYMBOL]: ConnectionsMap;
+  [DOCUMENT_KEY_SYMBOL]: DocumentKey;
+  [DOCUMENT_CONNECTIONS_SYMBOL]: ConnectionsMap;
 };
 
 export type DocumentPartial = Partial<Document>;

@@ -1,4 +1,4 @@
-import { CONNECTION_KEY_SYMBOL } from '../constants';
+import { DOCUMENT_CONNECTIONS_SYMBOL } from '../constants';
 import { Document, OperationContext } from '../types';
 import { getDocumentId } from '../utils/get-document-id';
 import { findOperation } from './find';
@@ -18,10 +18,10 @@ export function connectOperation(
     throw new Error(`Could not find a document for ${document}`);
   }
 
-  document[CONNECTION_KEY_SYMBOL] = document[CONNECTION_KEY_SYMBOL] || {};
-  document[CONNECTION_KEY_SYMBOL][field] = document[CONNECTION_KEY_SYMBOL][field] || new Set();
+  document[DOCUMENT_CONNECTIONS_SYMBOL] = document[DOCUMENT_CONNECTIONS_SYMBOL] || {};
+  document[DOCUMENT_CONNECTIONS_SYMBOL][field] = document[DOCUMENT_CONNECTIONS_SYMBOL][field] || new Set();
 
-  const connections = document[CONNECTION_KEY_SYMBOL][field];
+  const connections = document[DOCUMENT_CONNECTIONS_SYMBOL][field];
   connections.add(connectedKey);
 
   if (connectedInverseField) {

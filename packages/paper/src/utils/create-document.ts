@@ -1,5 +1,5 @@
 import { Document } from '../types';
-import { CONNECTION_KEY_SYMBOL, DOCUMENT_ID_SYMBOL } from '../constants';
+import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL } from '../constants';
 import { generateDocumentKey } from './generate-document-key';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,9 +8,9 @@ export function createDocument<T extends Document = Document>(partial: Record<st
     ...partial,
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [CONNECTION_KEY_SYMBOL]: partial[CONNECTION_KEY_SYMBOL as any] ?? {},
+    [DOCUMENT_CONNECTIONS_SYMBOL]: partial[DOCUMENT_CONNECTIONS_SYMBOL as any] ?? {},
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [DOCUMENT_ID_SYMBOL]: partial[DOCUMENT_ID_SYMBOL as any] ?? id ?? generateDocumentKey(),
+    [DOCUMENT_KEY_SYMBOL]: partial[DOCUMENT_KEY_SYMBOL as any] ?? id ?? generateDocumentKey(),
   } as T;
 }
