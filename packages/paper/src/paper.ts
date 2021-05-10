@@ -1,17 +1,20 @@
+import { GraphQLSchema } from 'graphql';
 import { produce, setAutoFreeze } from 'immer';
-import { proxyWrap } from './utils/proxy-wrap';
+import { defaultOperations } from './operations/index';
 import { transaction } from './transaction';
 import {
-  DocumentStore,
-  TransactionCallback,
   Document,
-  KeyOrDocument,
+  DocumentStore,
   DocumentTypeValidator,
   FieldValidator,
+  KeyOrDocument,
+  OperationMap,
+  TransactionCallback,
 } from './types';
-import { GraphQLSchema } from 'graphql';
+import { createDocumentStore } from './utils/create-document-store';
 import { findDocument } from './utils/find-document';
 import { isDocument } from './utils/is-document';
+import { proxyWrap } from './utils/proxy-wrap';
 import { validate } from './validations/validate';
 import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
 import { exclusiveFieldOrConnectionsValueForField } from './validations/validators/exclusive-field-or-connections-value';
@@ -20,8 +23,6 @@ import { multipleConnectionsForNonListField } from './validations/validators/mul
 import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
-import { createDocumentStore } from './utils/create-document-store';
-import { defaultOperations } from './operations/index';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -30,7 +31,7 @@ import { defaultOperations } from './operations/index';
 // > https://exploringjs.com/deep-js/ch_proxies.html
 setAutoFreeze(false);
 
-export class Paper {
+export class Paper<UserOperations extends OperationMap = OperationMap> {
   history: DocumentStore[] = [];
   current: DocumentStore;
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
@@ -43,13 +44,18 @@ export class Paper {
     scalarFieldValidator,
   ];
 
-  operations = defaultOperations;
+  operations: typeof defaultOperations & UserOperations;
 
   private sourceGrapQLSchema: GraphQLSchema;
 
-  constructor(graphqlSchema: GraphQLSchema) {
+  constructor(graphqlSchema: GraphQLSchema, options?: { operations?: OperationMap }) {
     this.sourceGrapQLSchema = graphqlSchema;
     this.current = createDocumentStore();
+
+    this.operations = {
+      ...(options?.operations as UserOperations),
+      ...defaultOperations,
+    };
   }
 
   get data(): DocumentStore {
@@ -80,7 +86,7 @@ export class Paper {
     });
   }
 
-  async mutate(fn: TransactionCallback<Paper['operations']>): Promise<void> {
+  async mutate(fn: TransactionCallback<Paper['operations'] & UserOperations>): Promise<void> {
     const next: DocumentStore = produce(this.current, (draft) => {
       const schema = this.sourceGrapQLSchema;
       const operations = this.operations;
