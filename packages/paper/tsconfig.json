@@ -3,7 +3,7 @@
   "include": [
     "src",
   ],
-  "exclude": ["./test"],
+  "exclude": ["./src/**/*.test.ts"],
   "compilerOptions": {
     "rootDir": "./src"
   }
