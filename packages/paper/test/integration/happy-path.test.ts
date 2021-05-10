@@ -155,6 +155,25 @@ describe('happy path', () => {
       expect(originalAccount.email).to.equal('windows95@aol.com');
       expect(updatedAccount.email).to.equal('beos@aol.com');
     });
+
+    it('supports promises within the mutate transaction', async () => {
+      let called = false;
+
+      const timeout = () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            called = true;
+            resolve(called);
+          }, 1500);
+        });
+
+      await paper.mutate(async () => {
+        const resolved = await timeout();
+        expect(resolved).to.equal(true);
+      });
+
+      expect(called).to.equal(true);
+    });
   });
 
   describe('validations', () => {

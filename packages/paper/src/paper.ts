@@ -87,10 +87,11 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   }
 
   async mutate(fn: TransactionCallback<Paper['operations'] & UserOperations>): Promise<void> {
-    const next: DocumentStore = produce(this.current, (draft) => {
+    const next: DocumentStore = await produce(this.current, async (draft) => {
       const schema = this.sourceGrapQLSchema;
       const operations = this.operations;
-      return transaction<typeof operations>(draft, schema, operations, fn);
+      const next = await transaction<typeof operations>(draft, schema, operations, fn);
+      return next;
     });
 
     this.validate(next);
