@@ -2,6 +2,7 @@
 
 ## TODO
 
+- [ ] Allow `null` or a Null Document to be added for connections
 - [ ] Involve the GraphQL Schema for transaction checks
 - [ ] Interfaces
       * Discrete representations

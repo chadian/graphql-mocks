@@ -82,9 +82,6 @@ export function graphqlConnectionsCheck(options: Options): void {
       throw new FieldCannotConnectMultiple({ type, field: graphqlField });
     }
 
-    // TODO: How to allow nulls mixed with data in list types
-    // ie: [Item] could be represented by [null, Item, null, Item] and still be valid
-
     for (const documentKey of fieldDocumentKeys) {
       const connectedDocument = findDocumentForType(data, typename, documentKey);
 

@@ -2,12 +2,30 @@ import { expect } from 'chai';
 import { Store } from '../../src/store';
 import { getDocumentKey } from '../../src/utils/get-document-key';
 import { getConnections } from '../../src/utils/get-connections';
+import { buildSchema } from 'graphql';
+
+const schemaString = `
+  schema {
+    query: Query
+  }
+
+  type Query {
+    person: Person
+  }
+
+  type Person {
+    name: String
+    friend: Person
+    bestFriend: Person
+  }
+`;
+const graphqlSchema = buildSchema(schemaString);
 
 describe('mutation operations', () => {
   let store: Store;
 
   beforeEach(() => {
-    store = new Store();
+    store = new Store(graphqlSchema);
   });
 
   it('can add a document', async () => {
@@ -66,7 +84,7 @@ describe('data', () => {
   let store: Store;
 
   beforeEach(async () => {
-    store = new Store();
+    store = new Store(graphqlSchema);
 
     await store.mutate(({ add, connect }) => {
       const ronald = add('Person', {
