@@ -1,26 +1,26 @@
 import { Document, DocumentStore, PaperDocumentEvent } from '../types';
 
-export class ConnectEvent implements PaperDocumentEvent {
-  name = 'connect';
+export class DisconnectEvent implements PaperDocumentEvent {
+  name = 'disconnect';
   store: DocumentStore;
   document: Document;
   field: string;
-  connectedTo: Document;
+  disconnectedFrom: Document;
 
   constructor({
     document,
     store,
     field,
-    connectedTo,
+    disconnectedFrom,
   }: {
     document: Document;
     store: DocumentStore;
     field: string;
-    connectedTo: Document;
+    disconnectedFrom: Document;
   }) {
     this.store = store;
     this.document = document;
     this.field = field;
-    this.connectedTo = connectedTo;
+    this.disconnectedFrom = disconnectedFrom;
   }
 }

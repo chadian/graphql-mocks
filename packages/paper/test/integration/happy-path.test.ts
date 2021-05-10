@@ -6,6 +6,8 @@ import { expect } from 'chai';
 import { getDocumentKey } from '../../src/utils/get-document-key';
 import { RemoveEvent } from '../../src/events/remove';
 import { ModifyEvent } from '../../src/events/modify-document';
+import { ConnectEvent } from '../../src/events/connect';
+import { DisconnectEvent } from '../../src/events/disconnect';
 
 const schemaString = `
   schema {
@@ -153,6 +155,58 @@ describe('happy path', () => {
       expect(team?.nullList).to.deep.equal([null, null, { id: '1', email: 'windows95@aol.com' }]);
     });
 
+    it('captures connect events', async () => {
+      await paper.mutate(({ add, connect }) => {
+        const app = add('App', {
+          id: '1',
+          name: 'my-fancy-app',
+        });
+
+        connect([app, 'owner'], [account]);
+      });
+
+      const app = paper.find('App', (document) => document.id === '1');
+      expect(app?.name).to.equal('my-fancy-app');
+      expect(app?.owner?.email).to.equal('windows95@aol.com');
+      expect(events).to.have.lengthOf(2);
+
+      const [, connectEvent] = events;
+      expect(connectEvent.name).to.equal('connect');
+      expect((connectEvent as ConnectEvent).field).to.equal('owner');
+      expect((connectEvent as ConnectEvent).document.name).to.equal('my-fancy-app');
+      expect((connectEvent as ConnectEvent).connectedTo.email).to.equal('windows95@aol.com');
+    });
+
+    it('disconnects a connected document', async () => {
+      let app: Document;
+
+      await paper.mutate(({ add, connect }) => {
+        app = add('App', {
+          id: '1',
+          name: 'my-fancy-app',
+        });
+
+        connect([app, 'owner'], [account]);
+      });
+
+      // reset events captured
+      events = [];
+
+      await paper.mutate(({ find, disconnect }) => {
+        const $app = find(app);
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        disconnect([$app!, 'owner'], [account]);
+      });
+
+      expect(events).to.have.length(1);
+      const disconnectEvent = events?.[0] as DisconnectEvent;
+      expect(disconnectEvent.name).to.equal('disconnect');
+      expect(disconnectEvent.field).to.equal('owner');
+      expect(disconnectEvent.document.name).to.equal('my-fancy-app');
+      expect(disconnectEvent.disconnectedFrom.email).to.equal('windows95@aol.com');
+    });
+
     it('edits an existing document', async () => {
       const originalAccount = account;
       await paper.mutate(({ find, put }) => {
@@ -207,6 +261,38 @@ describe('happy path', () => {
       expect(events[0]?.name).to.equal('remove');
       expect((events[0] as RemoveEvent).document?.id).to.deep.equal('1');
       expect((events[0] as RemoveEvent).document?.email).to.deep.equal('windows95@aol.com');
+    });
+
+    it('disconnects existing documents upon removal', async () => {
+      let app: Document | null = null;
+
+      await paper.mutate(({ add }) => {
+        app = add('App', {
+          id: 'app-id',
+          name: 'the-coolest-app',
+          owner: account,
+        });
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      expect(paper.findDocument(app!)).to.exist;
+
+      // reset captured events
+      events = [];
+
+      await paper.mutate(({ remove }) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        remove(app!);
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      expect(paper.findDocument(app!)).to.not.exist;
+      expect(events).to.have.lengthOf(2);
+      const removeEvent = events[0];
+      const disconenctEvent = events[1];
+
+      expect(removeEvent.name).to.equal('remove');
+      expect(disconenctEvent.name).to.equal('disconnect');
     });
   });
 
