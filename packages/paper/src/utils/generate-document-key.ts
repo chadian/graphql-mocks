@@ -1,5 +1,3 @@
 import { nanoid } from 'nanoid';
 
-const generateDocumentKey = () => nanoid(10);
-
-module.exports = { generateDocumentKey };
+export const generateDocumentKey = () => nanoid(10);

@@ -9,7 +9,7 @@ import { transaction } from './transaction';
 // > https://exploringjs.com/deep-js/ch_proxies.html
 setAutoFreeze(false);
 
-class Store {
+export class Store {
   history = [];
   _data = {};
 
@@ -26,5 +26,3 @@ class Store {
     return this;
   }
 }
-
-module.exports = { Store };

@@ -1,7 +1,7 @@
 import { getConnections } from '../utils/get-connections';
 import { findDocument } from './find-document';
 
-function proxyWrap(store, target) {
+export function proxyWrap(store, target) {
   return new Proxy(target, {
     get(target, prop) {
       if (Reflect.has(target, prop)) {
@@ -13,10 +13,7 @@ function proxyWrap(store, target) {
           result = result.bind(target);
         }
 
-        const wrapped =
-          typeof result === 'object'
-            ? proxyWrap(store, result)
-            : result;
+        const wrapped = typeof result === 'object' ? proxyWrap(store, result) : result;
         return wrapped;
       }
 
@@ -26,20 +23,14 @@ function proxyWrap(store, target) {
           .map((key) => findDocument(store._data, key))
           .map((document) => proxyWrap(store, document));
 
-        return connectedDocuments.length === 1
-          ? connectedDocuments[0]
-          : connectedDocuments;
+        return connectedDocuments.length === 1 ? connectedDocuments[0] : connectedDocuments;
       }
 
       return Reflect.get(target, prop);
     },
 
     set() {
-      throw new Error(
-        'Setting on data pulled from the store is not allowed, use the `mutate` method.'
-      );
+      throw new Error('Setting on data pulled from the store is not allowed, use the `mutate` method.');
     },
   });
 }
-
-module.exports = { proxyWrap }

@@ -1,7 +1,7 @@
 import { generateDocumentKey } from '../utils/generate-document-key';
 import { DOCUMENT_ID_SYMBOL } from '../constants';
 
-function addOperation(context, type, document) {
+export function addOperation(context, type, document) {
   const {data} = context;
   const id = generateDocumentKey();
   data[type] = data[type] || [];
@@ -10,5 +10,3 @@ function addOperation(context, type, document) {
 
   return id;
 }
-
-module.exports = { addOperation };

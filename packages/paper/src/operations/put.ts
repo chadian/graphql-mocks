@@ -1,10 +1,9 @@
 import merge from 'lodash.merge';
+import { findOperation } from './find';
 
-function putOperation(context, id, document) {
+export function putOperation(context, id, document) {
   const found = findOperation(context, id);
   merge(found, document);
 
   return id;
 }
-
-module.exports = {putOperation};
