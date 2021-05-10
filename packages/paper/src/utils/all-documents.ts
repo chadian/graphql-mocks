@@ -1,7 +1,7 @@
-import { DataStore, Document } from '../types';
+import { DocumentStore, Document } from '../types';
 
-export function allDocuments(data: DataStore): Document[] {
-  const all = Object.values(data).reduce((all, documents) => {
+export function allDocuments(store: DocumentStore): Document[] {
+  const all = Object.values(store).reduce((all, documents) => {
     return [...all, ...documents] as Document[];
   }, [] as Document[]);
 

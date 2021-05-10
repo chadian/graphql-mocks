@@ -1,9 +1,9 @@
 import { GraphQLSchema } from 'graphql';
-import { Document, DataStore, DocumentTypeValidator, FieldValidator } from '../types';
+import { Document, DocumentStore, DocumentTypeValidator, FieldValidator } from '../types';
 import { validate } from './validate';
 
 export function validateStore(
-  store: DataStore,
+  store: DocumentStore,
   graphqlSchema: GraphQLSchema,
   validators: { document: DocumentTypeValidator[]; field: FieldValidator[] },
 ): void {

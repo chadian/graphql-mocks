@@ -67,7 +67,7 @@ describe('happy path', () => {
       expect(foundAccount.email).to.equal('windows95@aol.com');
     });
 
-    it('provides the data store structure available', () => {
+    it('provides the document store structure available', () => {
       expect(paper.data.Account).to.have.length(1);
       expect(paper.data.Account?.[0]?.id).to.equal('1');
       expect(paper.data.Account?.[0]?.email).to.equal('windows95@aol.com');
@@ -133,6 +133,26 @@ describe('happy path', () => {
       expect(getDocumentKey(originalAccount)).to.equal(getDocumentKey(updatedAccount));
       expect(originalAccount.email).to.equal('windows95@aol.com');
       expect(updatedAccount.email).to.equal('beos@aol.com');
+    });
+  });
+
+  describe('validations', () => {
+    it('provides validation feedback on transactions', async () => {
+      let caughtError;
+      try {
+        await paper.mutate(({ add }) => {
+          add('Account', {
+            id: '1',
+            email: null,
+          });
+        });
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError.message).to.equal(
+        'The field "email" represents a graphql "String! (non-null)" type and on the document should be a non-null, but got null',
+      );
     });
   });
 });

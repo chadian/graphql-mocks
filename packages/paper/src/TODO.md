@@ -3,22 +3,10 @@
 ## TODO
 
 - [ ] Allow `null` or a Null Document to be added for connections
-- [ ] Involve the GraphQL Schema for transaction checks
-- [ ] Interfaces
-      * Discrete representations
-- [ ] Unions
-      * Unified or Discrete representations
 - [ ] Create documents that do not correspond with an GraphQL type
 - [ ] Capture events from transaction
 - [ ] Factory helpers
-- [ ] Visualize
-      documents & keys and connections only
-- [ ] Make reads to the store sync
-- [ ] Maybe add a `static` or a `readOnly` container that is like
-      a mutation frame but with read-only operations
-- [ ] Memoize lookup functions per transactions?
-      If references within a transaction are guaranteed per key then
-      it might be possible to memoize...
+- [ ] Visualize documents & keys and connections only
 
 ## DONE
 
@@ -30,3 +18,5 @@
       represent/lookup the corresponding object
 - [X] Make API friendly for extracting ID if passed a document, ie connect(ID or document(id is internally stashed))
 - [X] Make `mutate` async
+- [X] Involve the GraphQL Schema for transaction checks
+- [X] Make reads to the store sync

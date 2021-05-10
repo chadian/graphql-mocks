@@ -3,13 +3,13 @@ import { typeExists } from '../utils/graphql/type-exists';
 import { TypeDoesNotExist } from './errors/type-does-not-exist';
 import { TypeIsNotDocumentCompatible } from './errors/type-is-not-document-compatible';
 import { getDocumentTypename } from '../utils/get-document-typename';
-import { DataStore, Document, DocumentTypeValidator, FieldValidator } from '../types';
+import { DocumentStore, Document, DocumentTypeValidator, FieldValidator } from '../types';
 import { validateField } from './validate-field';
 
 export function validate(
   graphqlSchema: GraphQLSchema,
   document: Document,
-  data: DataStore,
+  store: DocumentStore,
   validators: { document: DocumentTypeValidator[]; field: FieldValidator[] },
 ): void {
   const typename = getDocumentTypename(document);
@@ -28,5 +28,5 @@ export function validate(
   }
 
   const combinedValidators: DocumentTypeValidator[] = [...validators.document, validateField(validators.field)];
-  combinedValidators.forEach((validator) => validator.validate({ data, graphqlSchema, document, type }));
+  combinedValidators.forEach((validator) => validator.validate({ store, graphqlSchema, document, type }));
 }

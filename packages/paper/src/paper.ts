@@ -2,7 +2,7 @@ import { produce, setAutoFreeze } from 'immer';
 import { proxyWrap } from './utils/proxy-wrap';
 import { transaction } from './transaction';
 import {
-  DataStore,
+  DocumentStore,
   TransactionCallback,
   ContextualOperationMap,
   DefaultContextualOperations,
@@ -31,8 +31,8 @@ import { scalarFieldValidator } from './validations/validators/scalar-field';
 setAutoFreeze(false);
 
 export class Paper {
-  history: DataStore[] = [];
-  current: DataStore = {};
+  history: DocumentStore[] = [];
+  current: DocumentStore = {};
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
   fieldValidators: FieldValidator[] = [
     exclusiveFieldOrConnectionValueForfield,
@@ -49,7 +49,7 @@ export class Paper {
     this.sourceGrapQLSchema = graphqlSchema;
   }
 
-  get data(): DataStore {
+  get data(): DocumentStore {
     return proxyWrap(this.current, this.current);
   }
 
@@ -64,7 +64,7 @@ export class Paper {
     return isDocument(result) ? proxyWrap(this.current, result) : result;
   }
 
-  validate(_store?: DataStore): void {
+  validate(_store?: DocumentStore): void {
     const store = _store ?? this.current;
 
     Object.values(store).forEach((documents) => {
@@ -79,13 +79,12 @@ export class Paper {
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
     fn: TransactionCallback<T>,
-  ): Promise<Paper> {
+  ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const next: DataStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
+    const next: DocumentStore = produce(transaction)(this.current, this.sourceGrapQLSchema, fn as any);
 
-    this.history.push(next);
+    this.validate(next);
     this.current = next;
-
-    return this;
+    this.history.push(next);
   }
 }

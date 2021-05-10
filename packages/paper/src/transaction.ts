@@ -4,11 +4,11 @@ import { findOperation } from './operations/find';
 import { connectOperation } from './operations/connect';
 import { removeOperation } from './operations/remove';
 import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
-import { DataStore, TransactionCallback } from './types';
+import { DocumentStore, TransactionCallback } from './types';
 import { GraphQLSchema } from 'graphql';
 
-export function transaction(draft: DataStore, schema: GraphQLSchema, fn: TransactionCallback): DataStore {
-  const context = { schema, data: draft };
+export function transaction(draft: DocumentStore, schema: GraphQLSchema, fn: TransactionCallback): DocumentStore {
+  const context = { schema, store: draft };
 
   // operations
   const add = addOperation.bind(null, context);

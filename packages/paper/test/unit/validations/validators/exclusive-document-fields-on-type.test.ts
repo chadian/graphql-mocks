@@ -16,7 +16,7 @@ it('throws if the document has a field that does not exist on the graphql type',
 
   expect(() =>
     exclusiveDocumentFieldsOnType.validate({
-      data: {},
+      store: {},
       graphqlSchema,
       document,
       type: graphqlSchema.getType('Person') as GraphQLObjectType,

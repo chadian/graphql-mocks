@@ -26,12 +26,12 @@ type Connections = Array<string>;
 
 // store
 
-export type DataStore<Typename extends string = string> = Record<Typename, Document[]>;
+export type DocumentStore<Typename extends string = string> = Record<Typename, Document[]>;
 
 // operations
 
 export type OperationContext = {
-  data: DataStore;
+  store: DocumentStore;
   schema: GraphQLSchema;
 };
 
@@ -89,6 +89,6 @@ export interface DocumentTypeValidator {
     type: GraphQLObjectType<any>;
     document: Document;
     graphqlSchema: GraphQLSchema;
-    data: DataStore;
+    store: DocumentStore;
   }): void;
 }

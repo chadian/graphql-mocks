@@ -1,8 +1,8 @@
 import { Operation, OperationContext } from '../types';
 
 export const getDocumentsForTypeOperation: Operation = function getDocumentsForTypeOperation(context, type) {
-  const { data } = context;
-  return data[type];
+  const { store } = context;
+  return store[type];
 };
 
 // Only used for generating type after the resulting `bind`
