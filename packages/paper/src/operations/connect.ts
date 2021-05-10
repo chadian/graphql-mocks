@@ -1,5 +1,5 @@
-import { DOCUMENT_CONNECTIONS_SYMBOL } from '../constants';
 import { Document, OperationContext } from '../types';
+import { connectDocument } from '../utils/connect-document';
 import { getDocumentKey } from '../utils/get-document-key';
 import { findOperation } from './find';
 
@@ -18,17 +18,17 @@ export function connectOperation(
     throw new Error(`Could not find a document for ${document}`);
   }
 
-  document[DOCUMENT_CONNECTIONS_SYMBOL] = document[DOCUMENT_CONNECTIONS_SYMBOL] || {};
-  document[DOCUMENT_CONNECTIONS_SYMBOL][field] = document[DOCUMENT_CONNECTIONS_SYMBOL][field] || new Set();
+  if (!findOperation(context, connectedKeyOrDocument)) {
+    throw new Error(`Could not find a document for ${connectedKeyOrDocument}`);
+  }
 
-  const connections = document[DOCUMENT_CONNECTIONS_SYMBOL][field];
-  connections.add(connectedKey);
+  connectDocument(document, field, connectedKey);
 
   if (connectedInverseField) {
     connectOperation(context, [connectedKey, connectedInverseField], [key]);
   }
 }
 
-// Only used for generating type after the resulting `bind`
+// Only used for generating typescript type after the resulting `bind`
 const bound = connectOperation.bind(null, {} as OperationContext);
 export type ContextualOperation = typeof bound;

@@ -12,20 +12,20 @@ setAutoFreeze(false);
 
 export class Store {
   history: DataStore[] = [];
-  _data = {};
+  current: DataStore = {};
 
   get data(): DataStore {
-    return proxyWrap(this, this._data);
+    return proxyWrap(this, this.current);
   }
 
   async mutate<T extends ContextualOperationMap = DefaultContextualOperations>(
     fn: TransactionCallback<T>,
   ): Promise<Store> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const next: DataStore = produce(transaction)(this._data, fn as any);
+    const next: DataStore = produce(transaction)(this.current, fn as any);
     // TODO: Add validation of the `next`
     this.history.push(next);
-    this._data = next;
+    this.current = next;
 
     return this;
   }

@@ -19,11 +19,10 @@ export type DocumentPartial = Partial<Document>;
 // connections
 type ConnectionFieldName = string;
 export type ConnectionsMap = Record<ConnectionFieldName, Connections>;
-type Connections = Set<string>;
+type Connections = Array<string>;
 
 // store
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DataStore<Typename extends string = string> = Record<Typename, Document[]>;
 
 // operations

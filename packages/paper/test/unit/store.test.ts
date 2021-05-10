@@ -58,7 +58,7 @@ describe('mutation operations', () => {
     const june = store.data.Person.find((person) => person.name === 'June');
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(getConnections(ronald!).friend.has(getDocumentKey(june!)!)).to.equal(true);
+    expect(getConnections(ronald!).friend.includes(getDocumentKey(june!)!)).to.equal(true);
   });
 });
 

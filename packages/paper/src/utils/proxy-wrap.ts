@@ -29,7 +29,7 @@ export function proxyWrap(store: Store, target: DataStore | Document): DataStore
 
         if (connectedDocumentKeys) {
           const connectedDocuments = Array.from(connectedDocumentKeys)
-            .map((key) => findDocument(store._data, key))
+            .map((key) => findDocument(store.current, key))
             .filter(Boolean)
             .map((document) => proxyWrap(store, document as Document));
 
