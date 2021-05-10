@@ -1,4 +1,4 @@
-import { ContextualOperation as AddContextualOperation } from './add';
+import { ContextualOperation as CreateContextualOperation } from './create';
 import { ContextualOperation as ConnectContextualOperation } from './connect';
 import { ContextualOperation as FindContextualOperation } from './find';
 import { ContextualOperation as GetDocumentsForTypeContextualOperation } from './get-documents-for-type';
@@ -7,7 +7,7 @@ import { ContextualOperation as RemoveContextualOperation } from './remove';
 import { ContextualOperation as GetNullContextOperation } from './get-null-document';
 
 export type DefaultContextualOperations = {
-  add: AddContextualOperation;
+  create: CreateContextualOperation;
   connect: ConnectContextualOperation;
   find: FindContextualOperation;
   getDocumentsForType: GetDocumentsForTypeContextualOperation;

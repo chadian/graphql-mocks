@@ -28,9 +28,9 @@ describe('mutation operations', () => {
     paper = new Paper(graphqlSchema);
   });
 
-  it('can add a document', async () => {
-    await paper.mutate(({ add }) => {
-      add('Person', {
+  it('can create a document', async () => {
+    await paper.mutate(({ create }) => {
+      create('Person', {
         name: 'Ronald',
       });
     });
@@ -47,8 +47,8 @@ describe('mutation operations', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let foundRonaldDoc: any;
 
-    await paper.mutate(({ add, find }) => {
-      ronaldDoc = add('Person', {
+    await paper.mutate(({ create, find }) => {
+      ronaldDoc = create('Person', {
         name: 'Ronald',
       });
 
@@ -60,12 +60,12 @@ describe('mutation operations', () => {
   });
 
   it('can connect one document to another', async () => {
-    await paper.mutate(({ add, connect }) => {
-      const ronald = add('Person', {
+    await paper.mutate(({ create, connect }) => {
+      const ronald = create('Person', {
         name: 'Ronald',
       });
 
-      const june = add('Person', {
+      const june = create('Person', {
         name: 'June',
       });
 
@@ -86,12 +86,12 @@ describe('data', () => {
   beforeEach(async () => {
     paper = new Paper(graphqlSchema);
 
-    await paper.mutate(({ add, connect }) => {
-      const ronald = add('Person', {
+    await paper.mutate(({ create, connect }) => {
+      const ronald = create('Person', {
         name: 'Ronald',
       });
 
-      const jessica = add('Person', {
+      const jessica = create('Person', {
         name: 'Jessica',
       });
 

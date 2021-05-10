@@ -50,8 +50,8 @@ describe('happy path', () => {
   beforeEach(async () => {
     paper = new Paper(graphqlSchema);
 
-    await paper.mutate(({ add }) => {
-      add('Account', {
+    await paper.mutate(({ create }) => {
+      create('Account', {
         id: '1',
         email: 'windows95@aol.com',
       });
@@ -89,8 +89,8 @@ describe('happy path', () => {
 
   describe('mutations', () => {
     it('creates a new document', async () => {
-      await paper.mutate(({ add }) => {
-        add('Account', {
+      await paper.mutate(({ create }) => {
+        create('Account', {
           id: '2',
           email: 'macos9@aol.com',
         });
@@ -101,14 +101,14 @@ describe('happy path', () => {
       expect(account?.email).to.equal('macos9@aol.com');
 
       expect(events).to.have.lengthOf(1);
-      expect(events[0]?.name).to.equal('add');
+      expect(events[0]?.name).to.equal('create');
       expect(events[0]?.document?.id).to.equal('2');
       expect(events[0]?.document?.email).to.equal('macos9@aol.com');
     });
 
     it('creates a new document with a connected document, implictly on property', async () => {
-      await paper.mutate(({ add }) => {
-        add('App', {
+      await paper.mutate(({ create }) => {
+        create('App', {
           id: '1',
           name: 'my-fancy-app',
           owner: account,
@@ -121,8 +121,8 @@ describe('happy path', () => {
     });
 
     it('creates a new document with a connected document, explicitly by `connect`', async () => {
-      await paper.mutate(({ add, connect }) => {
-        const app = add('App', {
+      await paper.mutate(({ create, connect }) => {
+        const app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
@@ -136,8 +136,8 @@ describe('happy path', () => {
     });
 
     it('connects to null documents', async () => {
-      await paper.mutate(({ add, connect, getNullDocument }) => {
-        const team = add('Team', {
+      await paper.mutate(({ create, connect, getNullDocument }) => {
+        const team = create('Team', {
           id: '1',
           name: 'my-fancy-app',
           owner: {
@@ -156,8 +156,8 @@ describe('happy path', () => {
     });
 
     it('captures connect events', async () => {
-      await paper.mutate(({ add, connect }) => {
-        const app = add('App', {
+      await paper.mutate(({ create, connect }) => {
+        const app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
@@ -180,8 +180,8 @@ describe('happy path', () => {
     it('disconnects a connected document', async () => {
       let app: Document;
 
-      await paper.mutate(({ add, connect }) => {
-        app = add('App', {
+      await paper.mutate(({ create, connect }) => {
+        app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
@@ -266,8 +266,8 @@ describe('happy path', () => {
     it('disconnects existing documents upon removal', async () => {
       let app: Document | null = null;
 
-      await paper.mutate(({ add }) => {
-        app = add('App', {
+      await paper.mutate(({ create }) => {
+        app = create('App', {
           id: 'app-id',
           name: 'the-coolest-app',
           owner: account,
@@ -300,8 +300,8 @@ describe('happy path', () => {
     it('provides validation feedback on transactions', async () => {
       let caughtError;
       try {
-        await paper.mutate(({ add }) => {
-          add('Account', {
+        await paper.mutate(({ create }) => {
+          create('Account', {
             id: '1',
             email: null,
           });

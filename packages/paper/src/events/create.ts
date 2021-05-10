@@ -1,7 +1,7 @@
 import { Document, DocumentStore, PaperDocumentEvent } from '../types';
 
-export class AddEvent implements PaperDocumentEvent {
-  name = 'add';
+export class CreateEvent implements PaperDocumentEvent {
+  name = 'create';
   store: DocumentStore;
   document: Document;
 

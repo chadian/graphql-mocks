@@ -1,4 +1,4 @@
-import { addOperation } from './add';
+import { createOperation } from './create';
 import { putOperation } from './put';
 import { findOperation } from './find';
 import { connectOperation } from './connect';
@@ -8,7 +8,7 @@ import { getDocumentsForTypeOperation } from './get-documents-for-type';
 import { getNullDocumentOperation } from './get-null-document';
 
 export const defaultOperations = {
-  add: addOperation,
+  create: createOperation,
   put: putOperation,
   find: findOperation,
   connect: connectOperation,

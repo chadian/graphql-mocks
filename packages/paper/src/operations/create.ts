@@ -5,7 +5,11 @@ import { extractObjectTypes } from '../utils/graphql/extract-object-types';
 import { isDocument } from '../utils/is-document';
 import { connectOperation } from './connect';
 
-export function addOperation(context: OperationContext, typename: string, documentPartial: DocumentPartial): Document {
+export function createOperation(
+  context: OperationContext,
+  typename: string,
+  documentPartial: DocumentPartial,
+): Document {
   const { store, schema } = context;
   const document = createDocument(typename, documentPartial);
   const gqlType = schema.getType(typename) as Partial<GraphQLObjectType>;
@@ -31,5 +35,5 @@ export function addOperation(context: OperationContext, typename: string, docume
 }
 
 // Only used for generating type after the resulting `bind`
-const bound = addOperation.bind(null, {} as OperationContext);
+const bound = createOperation.bind(null, {} as OperationContext);
 export type ContextualOperation = typeof bound;
