@@ -15,7 +15,7 @@ const schemaString = `
 
   type Person {
     name: String
-    friend: Person
+    friends: [Person]
     bestFriend: Person
   }
 `;
@@ -69,14 +69,14 @@ describe('mutation operations', () => {
         name: 'June',
       });
 
-      connect([ronald, 'friend'], [june]);
+      connect([ronald, 'bestFriend'], [june]);
     });
 
     const ronald = paper.data.Person.find((person) => person.name === 'Ronald');
     const june = paper.data.Person.find((person) => person.name === 'June');
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(getConnections(ronald!).friend.includes(getDocumentKey(june!)!)).to.equal(true);
+    expect(getConnections(ronald!).bestFriend.includes(getDocumentKey(june!)!)).to.equal(true);
   });
 });
 

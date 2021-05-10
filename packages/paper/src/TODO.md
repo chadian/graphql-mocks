@@ -2,10 +2,9 @@
 
 ## TODO
 
-- [ ] Allow `null` or a Null Document to be added for connections
 - [ ] Create documents that do not correspond with an GraphQL type
 - [ ] Capture events from transaction
-- [ ] Factory helpers
+- [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
 
 ## DONE
@@ -20,3 +19,4 @@
 - [X] Make `mutate` async
 - [X] Involve the GraphQL Schema for transaction checks
 - [X] Make reads to the store sync
+- [X] Allow `null` or a Null Document to be added for connections

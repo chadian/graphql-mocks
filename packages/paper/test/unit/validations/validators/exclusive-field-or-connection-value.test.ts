@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
 import { connectDocument } from '../../../../src/utils/connect-document';
 import { createDocument } from '../../../../src/utils/create-document';
-import { exclusiveFieldOrConnectionValueForfield } from '../../../../src/validations/validators/exclusive-field-or-connection-value';
+import { exclusiveFieldOrConnectionsValueForField } from '../../../../src/validations/validators/exclusive-field-or-connections-value';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 
 it('throws if the document has a document connection and js property value for the same field', () => {
@@ -17,7 +17,7 @@ it('throws if the document has a document connection and js property value for t
   connectDocument(document, 'bestFriend', createDocument('Person', { name: 'Larry' }));
 
   expect(() =>
-    exclusiveFieldOrConnectionValueForfield.validate(
+    exclusiveFieldOrConnectionsValueForField.validate(
       createMockFieldValidatorOptions({
         graphqlSchema,
         document,

@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
+import { DOCUMENT_CONNECTIONS_SYMBOL } from '../../../../src/constants';
 import { createDocument } from '../../../../src/utils/create-document';
+import { key as nullDocumentKey } from '../../../../src/utils/null-document';
 import { listFieldValidator } from '../../../../src/validations/validators/list-field';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 
@@ -29,8 +31,8 @@ it('throws on a graphql list field mismatch', () => {
 
 it('throws on a graphql non-null item list [Person!] field containing a null', () => {
   const graphqlSchema = buildTestSchema(`
-      friends: [Person!]
-    `);
+    friends: [Person!]
+  `);
 
   const document = createDocument('Person', {
     friends: [{ name: 'Larry' }, null],
@@ -47,5 +49,30 @@ it('throws on a graphql non-null item list [Person!] field containing a null', (
     ),
   ).to.throw(
     'The field "friends" represents a graphql "[Person!]" type and on the document should be a non-null list, but got null in the array',
+  );
+});
+
+it('throws on a graphql non-null item list [Person!] field connected to a null document', () => {
+  const graphqlSchema = buildTestSchema(`
+    friends: [Person!]
+  `);
+
+  const document = createDocument('Person', {
+    [DOCUMENT_CONNECTIONS_SYMBOL]: {
+      friends: [nullDocumentKey],
+    },
+  });
+
+  expect(() =>
+    listFieldValidator.validate(
+      createMockFieldValidatorOptions({
+        graphqlSchema,
+        document,
+        type: graphqlSchema.getType('Person') as GraphQLObjectType,
+        fieldName: 'friends',
+      }),
+    ),
+  ).to.throw(
+    'The field "friends" represents a graphql "[Person!]" type and on the document should be a non-null list, but got connected null document',
   );
 });

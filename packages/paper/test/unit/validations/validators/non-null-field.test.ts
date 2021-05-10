@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
+import { DOCUMENT_CONNECTIONS_SYMBOL } from '../../../../src/constants';
 import { createDocument } from '../../../../src/utils/create-document';
+import { key as nullDocumentKey } from '../../../../src/utils/null-document';
 import { nonNullFieldValidator } from '../../../../src/validations/validators/non-null-field';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 
@@ -27,13 +29,13 @@ it('throws on a graphql non-null list [Person]! field containing a null', () => 
   );
 });
 
-it('throws on a graphql non-null field mismatch', () => {
+it('throws on a graphql non-null field connected to a null document', () => {
   const graphqlSchema = buildTestSchema(`
-    name: String!
+    bestFriend: Person!
   `);
 
   const document = createDocument('Person', {
-    name: null,
+    [DOCUMENT_CONNECTIONS_SYMBOL]: { bestFriend: [nullDocumentKey] },
   });
 
   expect(() =>
@@ -42,10 +44,10 @@ it('throws on a graphql non-null field mismatch', () => {
         graphqlSchema,
         document,
         type: graphqlSchema.getType('Person') as GraphQLObjectType,
-        fieldName: 'name',
+        fieldName: 'bestFriend',
       }),
     ),
   ).to.throw(
-    'The field "name" represents a graphql "String! (non-null)" type and on the document should be a non-null, but got null',
+    'The field "bestFriend" represents a graphql "Person! (non-null)" type and on the document should be a non-null, but got null document',
   );
 });

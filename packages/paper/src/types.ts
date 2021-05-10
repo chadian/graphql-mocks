@@ -1,5 +1,11 @@
 import { GraphQLField, GraphQLObjectType, GraphQLSchema } from 'graphql';
-import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL, DOCUMENT_GRAPHQL_TYPENAME } from './constants';
+import {
+  DOCUMENT_CONNECTIONS_SYMBOL,
+  DOCUMENT_KEY_SYMBOL,
+  DOCUMENT_GRAPHQL_TYPENAME,
+  DOCUMENT_INTERNAL_TYPE,
+} from './constants';
+import { nullDocument } from './utils/null-document';
 
 export { DefaultContextualOperations } from './operations/types';
 
@@ -22,11 +28,13 @@ export type DocumentPartial = Partial<Document>;
 // connections
 type ConnectionFieldName = string;
 export type ConnectionsMap = Record<ConnectionFieldName, Connections>;
-type Connections = Array<string>;
+type Connections = Array<DocumentKey>;
 
 // store
 
-export type DocumentStore<Typename extends string = string> = Record<Typename, Document[]>;
+export type DocumentStore<Typename extends string = string> = Record<Typename, Document[]> & {
+  [DOCUMENT_INTERNAL_TYPE]: [typeof nullDocument];
+};
 
 // operations
 
@@ -79,7 +87,7 @@ export interface FieldValidator {
     fieldValue: any;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    connectionValue: any[] | undefined;
+    fieldConnections: Connections | undefined;
   }): void;
 }
 

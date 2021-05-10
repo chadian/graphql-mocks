@@ -28,7 +28,7 @@ export const validateField: (fieldValidators: FieldValidator[]) => DocumentTypeV
             document,
             fieldName: field.name,
             fieldValue,
-            connectionValue,
+            fieldConnections: connectionValue,
             graphqlSchema,
           });
         });

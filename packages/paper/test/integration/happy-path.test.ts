@@ -23,6 +23,7 @@ const schemaString = `
     id: ID!
     name: String!
     owner: Account!
+    nullList: [Account]
   }
 
   union AppOwner = Account | Team
@@ -115,6 +116,26 @@ describe('happy path', () => {
       const app = paper.find('App', (document) => document.id === '1');
       expect(app?.name).to.equal('my-fancy-app');
       expect(app?.owner?.email).to.equal('windows95@aol.com');
+    });
+
+    it('connects to null documents', async () => {
+      await paper.mutate(({ add, connect, getNullDocument }) => {
+        const team = add('Team', {
+          id: '1',
+          name: 'my-fancy-app',
+          owner: {
+            id: '2',
+            email: 'test@aol.com',
+          },
+        });
+
+        connect([team, 'nullList'], [getNullDocument()]);
+        connect([team, 'nullList'], [getNullDocument()]);
+        connect([team, 'nullList'], [account]);
+      });
+
+      const team = paper.find('Team', (document) => document.id === '1');
+      expect(team?.nullList).to.deep.equal([null, null, { id: '1', email: 'windows95@aol.com' }]);
     });
 
     it('edits an existing document', async () => {

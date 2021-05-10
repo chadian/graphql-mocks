@@ -2,7 +2,7 @@ import { FieldValidator } from '../../types';
 import { getConnections } from '../../utils/get-connections';
 import { FieldDuplicateWithConnection } from '../errors/field-duplicate-with-connection';
 
-export const exclusiveFieldOrConnectionValueForfield: FieldValidator = {
+export const exclusiveFieldOrConnectionsValueForField: FieldValidator = {
   skipConnectionValue: false,
   skipNullValue: false,
   validate({ type, fieldName, fieldValue, document }) {

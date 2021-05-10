@@ -5,8 +5,8 @@ import { FieldCannotConnectMultiple } from '../errors/field-cannot-connect-multi
 export const multipleConnectionsForNonListField: FieldValidator = {
   skipConnectionValue: false,
   skipNullValue: false,
-  validate({ connectionValue, type, field }) {
-    if (!extractListType(field.type) && connectionValue && connectionValue?.length > 1) {
+  validate({ fieldConnections, type, field }) {
+    if (!extractListType(field.type) && fieldConnections && fieldConnections?.length > 1) {
       throw new FieldCannotConnectMultiple({ type, field });
     }
   },

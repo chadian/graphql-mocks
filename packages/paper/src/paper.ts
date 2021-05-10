@@ -16,12 +16,13 @@ import { findDocument } from './utils/find-document';
 import { isDocument } from './utils/is-document';
 import { validate } from './validations/validate';
 import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
-import { exclusiveFieldOrConnectionValueForfield } from './validations/validators/exclusive-field-or-connection-value';
+import { exclusiveFieldOrConnectionsValueForField } from './validations/validators/exclusive-field-or-connections-value';
 import { listFieldValidator } from './validations/validators/list-field';
 import { multipleConnectionsForNonListField } from './validations/validators/multiple-connections-for-non-list-field';
 import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
+import { createDocumentStore } from './utils/create-document-store';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -32,10 +33,10 @@ setAutoFreeze(false);
 
 export class Paper {
   history: DocumentStore[] = [];
-  current: DocumentStore = {};
+  current: DocumentStore;
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
   fieldValidators: FieldValidator[] = [
-    exclusiveFieldOrConnectionValueForfield,
+    exclusiveFieldOrConnectionsValueForField,
     listFieldValidator,
     multipleConnectionsForNonListField,
     nonNullFieldValidator,
@@ -47,6 +48,7 @@ export class Paper {
 
   constructor(graphqlSchema: GraphQLSchema) {
     this.sourceGrapQLSchema = graphqlSchema;
+    this.current = createDocumentStore();
   }
 
   get data(): DocumentStore {

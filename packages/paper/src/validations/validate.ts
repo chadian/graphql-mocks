@@ -5,6 +5,7 @@ import { TypeIsNotDocumentCompatible } from './errors/type-is-not-document-compa
 import { getDocumentTypename } from '../utils/get-document-typename';
 import { DocumentStore, Document, DocumentTypeValidator, FieldValidator } from '../types';
 import { validateField } from './validate-field';
+import { DOCUMENT_INTERNAL_TYPE } from '../constants';
 
 export function validate(
   graphqlSchema: GraphQLSchema,
@@ -13,6 +14,11 @@ export function validate(
   validators: { document: DocumentTypeValidator[]; field: FieldValidator[] },
 ): void {
   const typename = getDocumentTypename(document);
+
+  if (typename === DOCUMENT_INTERNAL_TYPE) {
+    return;
+  }
+
   const type = graphqlSchema.getType(typename);
 
   if (!type) {

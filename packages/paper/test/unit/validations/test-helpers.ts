@@ -44,6 +44,6 @@ export const createMockFieldValidatorOptions = (
     document,
     fieldName: options.fieldName,
     fieldValue: document[field.name],
-    connectionValue: getConnections(document)[field.name],
+    fieldConnections: getConnections(document)[field.name],
   };
 };

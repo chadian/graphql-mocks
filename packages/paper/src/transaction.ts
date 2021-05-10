@@ -6,6 +6,7 @@ import { removeOperation } from './operations/remove';
 import { getDocumentsForTypeOperation } from './operations/get-documents-for-type';
 import { DocumentStore, TransactionCallback } from './types';
 import { GraphQLSchema } from 'graphql';
+import { getNullDocumentOperation } from './operations/get-null-document';
 
 export function transaction(draft: DocumentStore, schema: GraphQLSchema, fn: TransactionCallback): DocumentStore {
   const context = { schema, store: draft };
@@ -17,9 +18,10 @@ export function transaction(draft: DocumentStore, schema: GraphQLSchema, fn: Tra
   const connect = connectOperation.bind(null, context);
   const remove = removeOperation.bind(null, context);
   const getDocumentsForType = getDocumentsForTypeOperation.bind(null, context);
+  const getNullDocument = getNullDocumentOperation.bind(null, context);
 
-  // provide functions to make changes with bound datas
-  fn({ add, put, find, remove, getDocumentsForType, connect });
+  // provide functions to make changes with bound context
+  fn({ add, put, find, remove, connect, getDocumentsForType, getNullDocument });
 
   // return the changes
   return draft;

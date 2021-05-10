@@ -2,6 +2,7 @@ import { DocumentStore, Document } from '../types';
 import { getConnections } from '../utils/get-connections';
 import { findDocument } from './find-document';
 import { isDocument } from './is-document';
+import { nullDocument } from './null-document';
 
 export function proxyWrap<T extends DocumentStore | Document>(store: DocumentStore, target: T): T {
   return new Proxy(target, {
@@ -34,7 +35,13 @@ export function proxyWrap<T extends DocumentStore | Document>(store: DocumentSto
           const connectedDocuments = Array.from(connectedDocumentKeys)
             .map((key) => findDocument(store, key))
             .filter(Boolean)
-            .map((document) => proxyWrap(store, document as Document));
+            .map((document) => {
+              if (document === nullDocument) {
+                return null;
+              }
+
+              return proxyWrap(store, document as Document);
+            });
 
           // TODO: Do type check on whether to return singular or plural
           return connectedDocuments.length === 1 ? connectedDocuments[0] : connectedDocuments;

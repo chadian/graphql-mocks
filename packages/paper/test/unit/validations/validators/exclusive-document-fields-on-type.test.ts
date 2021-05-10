@@ -3,6 +3,7 @@ import { GraphQLObjectType } from 'graphql';
 import { createDocument } from '../../../../src/utils/create-document';
 import { buildTestSchema } from '../test-helpers';
 import { exclusiveDocumentFieldsOnType } from '../../../../src/validations/validators/exclusive-document-fields-on-type';
+import { createDocumentStore } from '../../../../src/utils/create-document-store';
 
 it('throws if the document has a field that does not exist on the graphql type', () => {
   const graphqlSchema = buildTestSchema(`
@@ -16,7 +17,7 @@ it('throws if the document has a field that does not exist on the graphql type',
 
   expect(() =>
     exclusiveDocumentFieldsOnType.validate({
-      store: {},
+      store: createDocumentStore(),
       graphqlSchema,
       document,
       type: graphqlSchema.getType('Person') as GraphQLObjectType,
