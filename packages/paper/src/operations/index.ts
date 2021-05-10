@@ -5,7 +5,6 @@ import { connectOperation } from './connect';
 import { disconnectOperation } from './disconnect';
 import { removeOperation } from './remove';
 import { getDocumentsForTypeOperation } from './get-documents-for-type';
-import { getNullDocumentOperation } from './get-null-document';
 
 export const defaultOperations = {
   create: createOperation,
@@ -15,5 +14,4 @@ export const defaultOperations = {
   disconnect: disconnectOperation,
   remove: removeOperation,
   getDocumentsForType: getDocumentsForTypeOperation,
-  getNullDocument: getNullDocumentOperation,
 };

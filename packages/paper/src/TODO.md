@@ -6,9 +6,9 @@
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface
 - [ ] unique ID field validator
+- [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
-- [ ] auto increment ID fields (make configurable)
 
 ## DONE
 

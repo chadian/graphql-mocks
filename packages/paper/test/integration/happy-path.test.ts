@@ -136,7 +136,7 @@ describe('happy path', () => {
     });
 
     it('connects to null documents', async () => {
-      await paper.mutate(({ create, connect, getNullDocument }) => {
+      await paper.mutate(({ create, connect }) => {
         const team = create('Team', {
           id: '1',
           name: 'my-fancy-app',
@@ -146,8 +146,8 @@ describe('happy path', () => {
           },
         });
 
-        connect([team, 'nullList'], [getNullDocument()]);
-        connect([team, 'nullList'], [getNullDocument()]);
+        connect([team, 'nullList'], [null]);
+        connect([team, 'nullList'], [null]);
         connect([team, 'nullList'], [account]);
       });
 
