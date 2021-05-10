@@ -10,6 +10,7 @@
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
 - [ ] unique ID field validator
+- [ ] auto increment ID fields (make configurable)
 
 ## DONE
 

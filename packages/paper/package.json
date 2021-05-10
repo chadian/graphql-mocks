@@ -30,7 +30,8 @@
     "nanoid": "^3.1.20"
   },
   "devDependencies": {
-    "graphql": "^14"
+    "graphql": "^14",
+    "rxjs": "^6.6.7"
   },
   "peerDependencies": {
     "graphql": "^14.0.0 || ^15.0.0"

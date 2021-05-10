@@ -103,3 +103,16 @@ export interface DocumentTypeValidator {
     store: DocumentStore;
   }): void;
 }
+
+// events
+
+export type PaperEvent = {
+  name: string;
+  store: DocumentStore;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
+
+export type PaperDocumentEvent = PaperEvent & {
+  document: Document;
+};

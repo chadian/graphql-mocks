@@ -1,9 +1,10 @@
 // import { expect } from 'chai';
 import { Paper } from '../../src/paper';
-import { Document } from '../../src/types';
+import { Document, PaperEvent } from '../../src/types';
 import { buildSchema } from 'graphql';
 import { expect } from 'chai';
 import { getDocumentKey } from '../../src/utils/get-document-key';
+import { RemoveEvent } from '../../src/events/remove';
 
 const schemaString = `
   schema {
@@ -41,6 +42,7 @@ const graphqlSchema = buildSchema(schemaString);
 describe('happy path', () => {
   let paper: Paper;
   let account: Document;
+  let events: PaperEvent[];
 
   beforeEach(async () => {
     paper = new Paper(graphqlSchema);
@@ -50,6 +52,13 @@ describe('happy path', () => {
         id: '1',
         email: 'windows95@aol.com',
       });
+    });
+
+    events = [];
+    paper.events.subscribe({
+      next(event) {
+        events.push(event);
+      },
     });
 
     account = paper.find('Account', (account) => account.id === '1') as Document;
@@ -87,6 +96,11 @@ describe('happy path', () => {
       const account = paper.find('Account', (document) => document.id === '2');
       expect(account?.id).to.equal('2');
       expect(account?.email).to.equal('macos9@aol.com');
+
+      expect(events).to.have.lengthOf(1);
+      expect(events[0]?.name).to.equal('add');
+      expect(events[0]?.document?.id).to.equal('2');
+      expect(events[0]?.document?.email).to.equal('macos9@aol.com');
     });
 
     it('creates a new document with a connected document, implictly on property', async () => {
@@ -145,18 +159,30 @@ describe('happy path', () => {
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         put(acc!, {
+          id: '5',
           email: 'beos@aol.com',
         });
       });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const updatedAccount = paper.find('Account', (document) => document.id === '1')!;
+      const updatedAccount = paper.find('Account', (document) => document.id === '5')!;
       expect(getDocumentKey(originalAccount)).to.equal(getDocumentKey(updatedAccount));
       expect(originalAccount.email).to.equal('windows95@aol.com');
       expect(updatedAccount.email).to.equal('beos@aol.com');
+      expect(events).to.have.lengthOf(2);
+
+      expect(events[0]?.name).to.equal('modify');
+      expect(events[0]?.property).to.equal('id');
+      expect(events[0]?.previousValue).to.equal('1');
+      expect(events[0]?.value).to.equal('5');
+
+      expect(events[1]?.name).to.equal('modify');
+      expect(events[1]?.property).to.equal('email');
+      expect(events[1]?.previousValue).to.equal('windows95@aol.com');
+      expect(events[1]?.value).to.equal('beos@aol.com');
     });
 
-    it('supports promises within the mutate transaction', async () => {
+    it('supports promises within a mutate transaction', async () => {
       let called = false;
 
       const timeout = () =>
@@ -173,6 +199,17 @@ describe('happy path', () => {
       });
 
       expect(called).to.equal(true);
+    });
+
+    it('removes existing documents', async () => {
+      await paper.mutate(({ remove }) => {
+        remove(account);
+      });
+
+      expect(events).to.have.lengthOf(1);
+      expect(events[0]?.name).to.equal('remove');
+      expect((events[0] as RemoveEvent).document?.id).to.deep.equal('1');
+      expect((events[0] as RemoveEvent).document?.email).to.deep.equal('windows95@aol.com');
     });
   });
 
