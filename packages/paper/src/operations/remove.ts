@@ -21,7 +21,3 @@ export function removeOperation(context: OperationContext, keyOrDocument: KeyOrD
 
   return document;
 }
-
-// Only used for generating type after the resulting `bind`
-const bound = removeOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;

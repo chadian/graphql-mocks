@@ -37,7 +37,3 @@ export function connectOperation(
     connectOperation(context, [connectedKey, connectedInverseField], [key]);
   }
 }
-
-// Only used for generating typescript type after the resulting `bind`
-const bound = connectOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;

@@ -18,7 +18,3 @@ export const putOperation = function putOperation(
   merge(found, documentPartial);
   return found;
 };
-
-// Only used for generating type after the resulting `bind`
-const bound = putOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;

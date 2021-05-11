@@ -7,8 +7,6 @@ import {
 } from './constants';
 import { nullDocument } from './utils/null-document';
 
-export { DefaultContextualOperations } from './operations/types';
-
 // documents
 
 export type DocumentKey = string;

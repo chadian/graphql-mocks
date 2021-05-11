@@ -33,7 +33,3 @@ export function createOperation(
 
   return document;
 }
-
-// Only used for generating type after the resulting `bind`
-const bound = createOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;

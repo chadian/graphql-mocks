@@ -7,7 +7,3 @@ export function findOperation(context: OperationContext, keyOrDocument: KeyOrDoc
   const key = getDocumentKey(keyOrDocument);
   return findDocument(store, key);
 }
-
-// Only used for generating type after the resulting `bind`
-const bound = findOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;

@@ -27,7 +27,3 @@ export function disconnectOperation(
     disconnectOperation(context, [disconnectedKey, disconnectInverseField], [key]);
   }
 }
-
-// Only used for generating typescript type after the resulting `bind`
-const bound = disconnectOperation.bind(null, {} as OperationContext);
-export type ContextualOperation = typeof bound;
