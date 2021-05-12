@@ -6,7 +6,7 @@ export async function transaction<T extends OperationMap>(
   schema: GraphQLSchema,
   contextualOperations: T,
   fn: TransactionCallback<T>,
-): Promise<DocumentStore> {
+): Promise<ReturnType<TransactionCallback<T>>> {
   const context = { schema, store: draft };
 
   const boundOperations: BoundOperationMap<T> = {} as BoundOperationMap<T>;
@@ -15,7 +15,6 @@ export async function transaction<T extends OperationMap>(
     boundOperations[key] = fn.bind(null, context) as BoundOperationMap<T>[typeof key];
   }
 
-  await fn(boundOperations);
-
-  return draft;
+  const transactionPayload = await fn(boundOperations);
+  return transactionPayload;
 }

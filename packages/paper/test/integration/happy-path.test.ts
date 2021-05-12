@@ -82,6 +82,14 @@ describe('happy path', () => {
   });
 
   describe('mutations', () => {
+    it('returns the transaction payload from #mutate', async () => {
+      const payload = await paper.mutate(() => {
+        return 'from the transaction';
+      });
+
+      expect(payload).to.equal('from the transaction');
+    });
+
     it('creates a new document', async () => {
       paper.events.addEventListener('create', (e) => events.push(e));
 

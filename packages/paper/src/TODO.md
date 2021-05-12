@@ -9,7 +9,6 @@
 - [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
-- [ ] Passthrough return from transaction to mutate
 
 ## DONE
 
@@ -26,3 +25,4 @@
 - [X] Allow `null` or a Null Document to be added for connections
 - [X] Capture events from transaction
 - [X] unique ID field validator
+- [X] Passthrough return from transaction to mutate

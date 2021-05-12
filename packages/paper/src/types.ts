@@ -60,7 +60,7 @@ export type BoundOperationMap<T extends OperationMap> = {
 };
 
 export interface TransactionCallback<T extends OperationMap> {
-  (operations: BoundOperationMap<T>): void | Promise<void>;
+  (operations: BoundOperationMap<T>): any | Promise<any>;
 }
 
 // validators
