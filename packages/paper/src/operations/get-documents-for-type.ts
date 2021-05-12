@@ -1,4 +1,4 @@
-import { Operation, OperationContext } from '../types';
+import { Operation } from '../types';
 
 export const getDocumentsForTypeOperation: Operation = function getDocumentsForTypeOperation(context, type) {
   const { store } = context;

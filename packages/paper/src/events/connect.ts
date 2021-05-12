@@ -1,6 +1,6 @@
 import { Document, DocumentStore, PaperDocumentEvent } from '../types';
 
-export class ConnectEvent implements PaperDocumentEvent {
+export class ConnectEvent extends Event implements PaperDocumentEvent {
   name = 'connect';
   store: DocumentStore;
   document: Document;
@@ -18,6 +18,7 @@ export class ConnectEvent implements PaperDocumentEvent {
     field: string;
     connectedTo: Document;
   }) {
+    super('connect');
     this.store = store;
     this.document = document;
     this.field = field;

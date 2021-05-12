@@ -1,6 +1,5 @@
 import { GraphQLSchema } from 'graphql';
 import { produce, setAutoFreeze } from 'immer';
-import { Subject } from 'rxjs';
 import { dispatch } from './events/dispatch';
 import { defaultOperations } from './operations/index';
 import { transaction } from './transaction';
@@ -9,9 +8,9 @@ import {
   DocumentStore,
   DocumentTypeValidator,
   FieldValidator,
+  Hook,
   KeyOrDocument,
   OperationMap,
-  PaperEvent,
   TransactionCallback,
 } from './types';
 import { createDocumentStore } from './utils/create-document-store';
@@ -38,6 +37,7 @@ setAutoFreeze(false);
 export class Paper<UserOperations extends OperationMap = OperationMap> {
   history: DocumentStore[] = [];
   current: DocumentStore;
+
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
 
   fieldValidators: FieldValidator[] = [
@@ -51,7 +51,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   ];
 
   operations: typeof defaultOperations & UserOperations;
-  events = new Subject<PaperEvent>();
+  events = new EventTarget();
 
   private sourceGrapQLSchema: GraphQLSchema;
 
@@ -93,12 +93,12 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     });
   }
 
-  private async dispatchEvents(previous: DocumentStore, store: DocumentStore) {
+  private dispatchEvents(previous: DocumentStore, store: DocumentStore) {
     dispatch(previous, store, this.events);
   }
 
   async mutate(fn: TransactionCallback<Paper['operations'] & UserOperations>): Promise<void> {
-    const next: DocumentStore = await produce(this.current, async (draft) => {
+    const next = await produce(this.current, async (draft) => {
       const schema = this.sourceGrapQLSchema;
       const operations = this.operations;
       const next = await transaction<typeof operations>(draft, schema, operations, fn);
@@ -106,7 +106,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     });
 
     this.validate(next);
-    await this.dispatchEvents(this.current, next);
+    this.dispatchEvents(this.current, next);
     this.current = next;
     this.history.push(next);
   }

@@ -9,6 +9,7 @@
 - [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
+- [ ] Passthrough return from transaction to mutate
 
 ## DONE
 

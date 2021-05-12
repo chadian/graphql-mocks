@@ -1,6 +1,6 @@
 // import { expect } from 'chai';
 import { Paper } from '../../src/paper';
-import { Document, PaperEvent } from '../../src/types';
+import { Document } from '../../src/types';
 import { buildSchema } from 'graphql';
 import { expect } from 'chai';
 import { getDocumentKey } from '../../src/utils/get-document-key';
@@ -45,7 +45,7 @@ const graphqlSchema = buildSchema(schemaString);
 describe('happy path', () => {
   let paper: Paper;
   let account: Document;
-  let events: PaperEvent[];
+  let events: any[];
 
   beforeEach(async () => {
     paper = new Paper(graphqlSchema);
@@ -58,12 +58,6 @@ describe('happy path', () => {
     });
 
     events = [];
-    paper.events.subscribe({
-      next(event) {
-        events.push(event);
-      },
-    });
-
     account = paper.find('Account', (account) => account.id === '1') as Document;
   });
 
@@ -89,6 +83,8 @@ describe('happy path', () => {
 
   describe('mutations', () => {
     it('creates a new document', async () => {
+      paper.events.addEventListener('create', (e) => events.push(e));
+
       await paper.mutate(({ create }) => {
         create('Account', {
           id: '2',
@@ -156,6 +152,8 @@ describe('happy path', () => {
     });
 
     it('captures connect events', async () => {
+      paper.events.addEventListener('connect', (e) => events.push(e));
+
       await paper.mutate(({ create, connect }) => {
         const app = create('App', {
           id: '1',
@@ -168,9 +166,9 @@ describe('happy path', () => {
       const app = paper.find('App', (document) => document.id === '1');
       expect(app?.name).to.equal('my-fancy-app');
       expect(app?.owner?.email).to.equal('windows95@aol.com');
-      expect(events).to.have.lengthOf(2);
+      expect(events).to.have.lengthOf(1);
 
-      const [, connectEvent] = events;
+      const [connectEvent] = events;
       expect(connectEvent.name).to.equal('connect');
       expect((connectEvent as ConnectEvent).field).to.equal('owner');
       expect((connectEvent as ConnectEvent).document.name).to.equal('my-fancy-app');
@@ -179,6 +177,7 @@ describe('happy path', () => {
 
     it('disconnects a connected document', async () => {
       let app: Document;
+      paper.events.addEventListener('disconnect', (e) => events.push(e));
 
       await paper.mutate(({ create, connect }) => {
         app = create('App', {
@@ -188,9 +187,6 @@ describe('happy path', () => {
 
         connect([app, 'owner'], [account]);
       });
-
-      // reset events captured
-      events = [];
 
       await paper.mutate(({ find, disconnect }) => {
         const $app = find(app);
@@ -209,6 +205,8 @@ describe('happy path', () => {
 
     it('edits an existing document', async () => {
       const originalAccount = account;
+      paper.events.addEventListener('modify', (e) => events.push(e));
+
       await paper.mutate(({ find, put }) => {
         const acc = find(account as Document);
 
@@ -253,6 +251,8 @@ describe('happy path', () => {
     });
 
     it('removes existing documents', async () => {
+      paper.events.addEventListener('remove', (e) => events.push(e));
+
       await paper.mutate(({ remove }) => {
         remove(account);
       });
@@ -266,6 +266,9 @@ describe('happy path', () => {
     it('disconnects existing documents upon removal', async () => {
       let app: Document | null = null;
 
+      paper.events.addEventListener('remove', (e) => events.push(e));
+      paper.events.addEventListener('disconnect', (e) => events.push(e));
+
       await paper.mutate(({ create }) => {
         app = create('App', {
           id: 'app-id',
@@ -276,9 +279,6 @@ describe('happy path', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expect(paper.findDocument(app!)).to.exist;
-
-      // reset captured events
-      events = [];
 
       await paper.mutate(({ remove }) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

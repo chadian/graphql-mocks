@@ -1,5 +1,4 @@
-import { Subject } from 'rxjs';
-import { Document, DocumentStore, KeyOrDocument, PaperEvent } from '../types';
+import { Document, DocumentStore, KeyOrDocument } from '../types';
 import { allDocuments } from '../utils/all-documents';
 import { findDocument } from '../utils/find-document';
 import { getDocumentKey } from '../utils/get-document-key';
@@ -127,19 +126,19 @@ function extractChanges(current: DocumentStore, previous: DocumentStore): Create
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function dispatch(previous: DocumentStore, store: DocumentStore, eventSubject: Subject<PaperEvent>) {
+export function dispatch(previous: DocumentStore, store: DocumentStore, eventTarget: EventTarget) {
   previous;
   store;
-  eventSubject;
+  eventTarget;
 
-  const dispatchCreated = (document: Document) => eventSubject.next(new CreateEvent({ document, store }));
-  const dispatchRemoved = (document: Document) => eventSubject.next(new RemoveEvent({ document, store }));
+  const dispatchCreated = (document: Document) => eventTarget.dispatchEvent(new CreateEvent({ document, store }));
+  const dispatchRemoved = (document: Document) => eventTarget.dispatchEvent(new RemoveEvent({ document, store }));
   const dispatchModified = (changes: DocumentModifiedChangeMap, document: Document) =>
-    eventSubject.next(new ModifyEvent({ document, store, changes }));
+    eventTarget.dispatchEvent(new ModifyEvent({ document, store, changes }));
   const dispatchConnected = (document: Document, field: string, connectedTo: Document) =>
-    eventSubject.next(new ConnectEvent({ document, field, connectedTo, store }));
+    eventTarget.dispatchEvent(new ConnectEvent({ document, field, connectedTo, store }));
   const dispatchDisconnected = (document: Document, field: string, disconnectedFrom: Document) =>
-    eventSubject.next(new DisconnectEvent({ document, field, disconnectedFrom, store }));
+    eventTarget.dispatchEvent(new DisconnectEvent({ document, field, disconnectedFrom, store }));
 
   const { createdDocuments, removedDocuments, modifiedDocuments, connections, disconnections } = extractChanges(
     store,

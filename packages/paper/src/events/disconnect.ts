@@ -1,6 +1,6 @@
 import { Document, DocumentStore, PaperDocumentEvent } from '../types';
 
-export class DisconnectEvent implements PaperDocumentEvent {
+export class DisconnectEvent extends Event implements PaperDocumentEvent {
   name = 'disconnect';
   store: DocumentStore;
   document: Document;
@@ -18,6 +18,7 @@ export class DisconnectEvent implements PaperDocumentEvent {
     field: string;
     disconnectedFrom: Document;
   }) {
+    super('disconnect');
     this.store = store;
     this.document = document;
     this.field = field;

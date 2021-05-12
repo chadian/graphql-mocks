@@ -105,7 +105,7 @@ export interface DocumentTypeValidator {
 
 // events
 
-export type PaperEvent = {
+export type PaperEvent = Event & {
   name: string;
   store: DocumentStore;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
