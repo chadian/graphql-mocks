@@ -2,6 +2,11 @@
 
 ## TODO
 
+- [ ] setter/getter connected documents
+- [ ] Passthrough proxywrapped documents
+- [ ] Hooks
+      - before/after transaction
+      - CRUD
 - [ ] initialize store for known graphql types from schema
 - [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
