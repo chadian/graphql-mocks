@@ -31,7 +31,7 @@ export function connectOperation(
     throw new Error(`Could not find a document for ${connectedKeyOrDocument}`);
   }
 
-  connectDocument(document, field, connectedKey);
+  connectDocument(context.store, document, field, connectedKey);
 
   if (connectedInverseField) {
     connectOperation(context, [connectedKey, connectedInverseField], [key]);

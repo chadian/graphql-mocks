@@ -19,9 +19,7 @@ import { isDocument } from './utils/is-document';
 import { proxyWrap } from './utils/proxy-wrap';
 import { validate } from './validations/validate';
 import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
-import { exclusiveFieldOrConnectionsValueForField } from './validations/validators/exclusive-field-or-connections-value';
 import { listFieldValidator } from './validations/validators/list-field';
-import { multipleConnectionsForNonListField } from './validations/validators/multiple-connections-for-non-list-field';
 import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
@@ -41,9 +39,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
 
   fieldValidators: FieldValidator[] = [
-    exclusiveFieldOrConnectionsValueForField,
     listFieldValidator,
-    multipleConnectionsForNonListField,
     nonNullFieldValidator,
     objectFieldValidator,
     scalarFieldValidator,
@@ -55,7 +51,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
 
   private sourceGrapQLSchema: GraphQLSchema;
 
-  constructor(graphqlSchema: GraphQLSchema, options?: { operations?: OperationMap }) {
+  constructor(graphqlSchema: GraphQLSchema, options?: { operations?: UserOperations }) {
     this.sourceGrapQLSchema = graphqlSchema;
     this.current = createDocumentStore();
 
@@ -103,7 +99,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     const next = await produce(this.current, async (draft) => {
       const schema = this.sourceGrapQLSchema;
       const operations = this.operations;
-      transactionPayload = transaction<typeof operations>(draft, schema, operations, fn as T);
+      transactionPayload = await transaction<typeof operations>(draft, schema, operations, fn as T);
     });
 
     this.validate(next);

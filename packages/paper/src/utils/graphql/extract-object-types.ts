@@ -9,10 +9,6 @@ export function extractObjectTypes(schema: GraphQLSchema, type: GraphQLType): Gr
     return [unwrapped];
   }
 
-  if (isObjectType(unwrapped)) {
-    return [unwrapped];
-  }
-
   if (isAbstractType(unwrapped)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return schema.getPossibleTypes(unwrapped) as GraphQLObjectType<any>[];

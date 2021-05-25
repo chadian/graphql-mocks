@@ -1,8 +1,8 @@
-import { GraphQLObjectType } from 'graphql';
+import { GraphQLNamedType, GraphQLObjectType } from 'graphql';
 import { Document, DocumentPartial, OperationContext } from '../types';
 import { createDocument } from '../utils/create-document';
 import { extractObjectTypes } from '../utils/graphql/extract-object-types';
-import { isDocument } from '../utils/is-document';
+import { unwrap } from '../utils/graphql/unwrap';
 import { connectOperation } from './connect';
 
 export function createOperation(
@@ -19,15 +19,15 @@ export function createOperation(
   store[typename] = store[typename] || [];
   store[typename].push(document);
 
-  for (const prop in document) {
-    const docPropValue = document[prop];
-    const field = gqlTypeFields[prop];
+  for (const fieldName in document) {
+    const field = gqlTypeFields[fieldName];
+    const documentFieldValue = document[fieldName];
     const possibleObjectTypes = extractObjectTypes(schema, field.type);
 
-    if (field && possibleObjectTypes.length > 0 && isDocument(docPropValue)) {
-      // been moved to a document connection instead, no longer needed as a document value
-      delete document[prop];
-      connectOperation(context, [document, prop], [docPropValue]);
+    // TODO: Handle List document values
+    if (field && documentFieldValue && possibleObjectTypes.length === 1) {
+      const fieldDocument = createOperation(context, (unwrap(field.type) as GraphQLNamedType).name, documentFieldValue);
+      connectOperation(context, [document, fieldName], [fieldDocument]);
     }
   }
 

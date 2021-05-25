@@ -7,7 +7,7 @@ export function createDocument<T extends Document = Document>(
   typename: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   partial: Record<string | symbol, any>,
-  id?: string,
+  key?: string,
 ): T {
   return {
     ...partial,
@@ -18,6 +18,6 @@ export function createDocument<T extends Document = Document>(
     [DOCUMENT_CONNECTIONS_SYMBOL]: partial[DOCUMENT_CONNECTIONS_SYMBOL as any] ?? {},
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [DOCUMENT_KEY_SYMBOL]: partial[DOCUMENT_KEY_SYMBOL as any] ?? id ?? generateDocumentKey(),
+    [DOCUMENT_KEY_SYMBOL]: partial[DOCUMENT_KEY_SYMBOL as any] ?? key ?? generateDocumentKey(),
   } as T;
 }

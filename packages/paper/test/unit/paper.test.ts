@@ -95,7 +95,7 @@ describe('data', () => {
         name: 'Jessica',
       });
 
-      connect([ronald, 'bestFriend'], [jessica, 'friend']);
+      connect([ronald, 'bestFriend'], [jessica, 'bestFriend']);
     });
   });
 
@@ -108,6 +108,6 @@ describe('data', () => {
   });
 
   it('can retrieve cyclical connected documents from a document', () => {
-    expect(paper.data.Person[0].bestFriend.friend.name).to.equal('Ronald');
+    expect(paper.data.Person[0].bestFriend.bestFriend.name).to.equal('Ronald');
   });
 });

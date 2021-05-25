@@ -247,7 +247,7 @@ describe('happy path', () => {
           setTimeout(() => {
             called = true;
             resolve(called);
-          }, 1500);
+          }, 100);
         });
 
       await paper.mutate(async () => {
@@ -271,37 +271,37 @@ describe('happy path', () => {
       expect((events[0] as RemoveEvent).document?.email).to.deep.equal('windows95@aol.com');
     });
 
-    it('disconnects existing documents upon removal', async () => {
-      let app: Document | null = null;
+    // it('disconnects existing documents upon removal', async () => {
+    //   let app: Document | null = null;
 
-      paper.events.addEventListener('remove', (e) => events.push(e));
-      paper.events.addEventListener('disconnect', (e) => events.push(e));
+    //   paper.events.addEventListener('remove', (e) => events.push(e));
+    //   paper.events.addEventListener('disconnect', (e) => events.push(e));
 
-      await paper.mutate(({ create }) => {
-        app = create('App', {
-          id: 'app-id',
-          name: 'the-coolest-app',
-          owner: account,
-        });
-      });
+    //   await paper.mutate(({ create }) => {
+    //     app = create('App', {
+    //       id: 'app-id',
+    //       name: 'the-coolest-app',
+    //       owner: account,
+    //     });
+    //   });
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      expect(paper.findDocument(app!)).to.exist;
+    //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //   expect(paper.findDocument(app!)).to.exist;
 
-      await paper.mutate(({ remove }) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        remove(app!);
-      });
+    //   await paper.mutate(({ remove }) => {
+    //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //     remove(app!);
+    //   });
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      expect(paper.findDocument(app!)).to.not.exist;
-      expect(events).to.have.lengthOf(2);
-      const removeEvent = events[0];
-      const disconenctEvent = events[1];
+    //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //   expect(paper.findDocument(app!)).to.not.exist;
+    //   expect(events).to.have.lengthOf(2);
+    //   const removeEvent = events[0];
+    //   const disconenctEvent = events[1];
 
-      expect(removeEvent.name).to.equal('remove');
-      expect(disconenctEvent.name).to.equal('disconnect');
-    });
+    //   expect(removeEvent.name).to.equal('remove');
+    //   expect(disconenctEvent.name).to.equal('disconnect');
+    // });
   });
 
   describe('validations', () => {
