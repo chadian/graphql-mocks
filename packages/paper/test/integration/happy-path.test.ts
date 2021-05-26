@@ -36,6 +36,7 @@ const schemaString = `
     id: ID!
     name: String!
     owner: AppOwner!
+    secondaryOwner: AppOwner
     releasedAt: String
     archivedAt: String
   }
@@ -125,13 +126,13 @@ describe('happy path', () => {
     });
 
     it('creates a new document with a connected document, explicitly by `connect`', async () => {
-      await paper.mutate(({ create, connect }) => {
+      await paper.mutate(({ create }) => {
         const app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
 
-        connect([app, 'owner'], [account]);
+        app.owner = account;
       });
 
       const app = paper.find('App', (document) => document.id === '1');
@@ -140,7 +141,7 @@ describe('happy path', () => {
     });
 
     it('connects to null documents', async () => {
-      await paper.mutate(({ create, connect }) => {
+      await paper.mutate(({ create }) => {
         const team = create('Team', {
           id: '1',
           name: 'my-fancy-app',
@@ -150,9 +151,7 @@ describe('happy path', () => {
           },
         });
 
-        connect([team, 'nullList'], [null]);
-        connect([team, 'nullList'], [null]);
-        connect([team, 'nullList'], [account]);
+        team.nullList = [null, null, account];
       });
 
       const team = paper.find('Team', (document) => document.id === '1');
@@ -162,13 +161,13 @@ describe('happy path', () => {
     it('captures connect events', async () => {
       paper.events.addEventListener('connect', (e) => events.push(e));
 
-      await paper.mutate(({ create, connect }) => {
+      await paper.mutate(({ create }) => {
         const app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
 
-        connect([app, 'owner'], [account]);
+        app.owner = account;
       });
 
       const app = paper.find('App', (document) => document.id === '1');
@@ -180,35 +179,38 @@ describe('happy path', () => {
       expect(connectEvent.name).to.equal('connect');
       expect((connectEvent as ConnectEvent).field).to.equal('owner');
       expect((connectEvent as ConnectEvent).document.name).to.equal('my-fancy-app');
-      expect((connectEvent as ConnectEvent).connectedTo.email).to.equal('windows95@aol.com');
+      expect((connectEvent as ConnectEvent).connectedTo?.email).to.equal('windows95@aol.com');
     });
 
     it('disconnects a connected document', async () => {
       let app: Document;
       paper.events.addEventListener('disconnect', (e) => events.push(e));
 
-      await paper.mutate(({ create, connect }) => {
+      await paper.mutate(({ create }) => {
         app = create('App', {
           id: '1',
           name: 'my-fancy-app',
         });
 
-        connect([app, 'owner'], [account]);
+        app.owner = account;
+        app.secondaryOwner = create('Account', {
+          id: '2',
+          email: 'secondary-owner@megacorp.com',
+        });
       });
 
-      await paper.mutate(({ find, disconnect }) => {
+      await paper.mutate(({ find }) => {
         const $app = find(app);
-
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        disconnect([$app!, 'owner'], [account]);
+        $app!.secondaryOwner = null;
       });
 
       expect(events).to.have.length(1);
       const disconnectEvent = events?.[0] as DisconnectEvent;
       expect(disconnectEvent.name).to.equal('disconnect');
-      expect(disconnectEvent.field).to.equal('owner');
+      expect(disconnectEvent.field).to.equal('secondaryOwner');
       expect(disconnectEvent.document.name).to.equal('my-fancy-app');
-      expect(disconnectEvent.disconnectedFrom.email).to.equal('windows95@aol.com');
+      expect(disconnectEvent.disconnectedFrom.email).to.equal('secondary-owner@megacorp.com');
     });
 
     it('edits an existing document', async () => {

@@ -8,7 +8,6 @@ import {
   DocumentStore,
   DocumentTypeValidator,
   FieldValidator,
-  Hook,
   KeyOrDocument,
   OperationMap,
   TransactionCallback,

@@ -3,7 +3,6 @@ import { Document, DocumentPartial, OperationContext } from '../types';
 import { createDocument } from '../utils/create-document';
 import { extractObjectTypes } from '../utils/graphql/extract-object-types';
 import { unwrap } from '../utils/graphql/unwrap';
-import { connectOperation } from './connect';
 
 export function createOperation(
   context: OperationContext,
@@ -27,7 +26,7 @@ export function createOperation(
     // TODO: Handle List document values
     if (field && documentFieldValue && possibleObjectTypes.length === 1) {
       const fieldDocument = createOperation(context, (unwrap(field.type) as GraphQLNamedType).name, documentFieldValue);
-      connectOperation(context, [document, fieldName], [fieldDocument]);
+      document[fieldName] = fieldDocument;
     }
   }
 

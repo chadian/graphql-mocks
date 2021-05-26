@@ -60,6 +60,7 @@ export type BoundOperationMap<T extends OperationMap> = {
 };
 
 export interface TransactionCallback<T extends OperationMap> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (operations: BoundOperationMap<T>): any | Promise<any>;
 }
 

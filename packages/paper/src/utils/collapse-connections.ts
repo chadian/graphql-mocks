@@ -6,6 +6,7 @@ import { getDocumentKey } from './get-document-key';
 import { extractListType } from './graphql/extract-list-type';
 import { extractObjectTypes } from './graphql/extract-object-types';
 import { isDocument } from './is-document';
+import { nullDocument } from './null-document';
 
 export function collapseConnections(graphqlSchema: GraphQLSchema, store: DocumentStore): void {
   for (const typeName in store) {
@@ -26,24 +27,23 @@ export function collapseConnections(graphqlSchema: GraphQLSchema, store: Documen
         const hasObjectReferences = extractObjectTypes(graphqlSchema, field.type).length > 0;
         const isListConnection = extractListType(field.type) && hasObjectReferences;
         const isSingularConnection = !extractListType(field.type) && hasObjectReferences;
+        const isConnectionField = isListConnection || isSingularConnection;
 
-        if (isListConnection || isSingularConnection) {
-          delete document[fieldName];
-        } else {
+        // skip non-connection fields
+        if (!isConnectionField) {
           continue;
         }
 
-        let connectedDocuments: unknown[];
-
-        if (documentFieldValue == null) {
-          connectedDocuments = [];
-        } else if (Array.isArray(documentFieldValue)) {
-          connectedDocuments = documentFieldValue;
-        } else {
-          connectedDocuments = [documentFieldValue];
+        // skip undefined cannot be used as a connection value, only null
+        if (documentFieldValue === undefined) {
+          continue;
         }
 
+        const connectedDocuments = Array.isArray(documentFieldValue) ? documentFieldValue : [documentFieldValue];
+
         const connectionKeys = connectedDocuments.map((maybeDocument) => {
+          maybeDocument = maybeDocument === null ? nullDocument : maybeDocument;
+
           if (!isDocument(maybeDocument)) {
             throw new Error(
               `Expected document in array on field ${fieldName}, got:\n${JSON.stringify(maybeDocument, null, 2)}`,
@@ -54,6 +54,9 @@ export function collapseConnections(graphqlSchema: GraphQLSchema, store: Documen
         });
 
         connections[fieldName] = connectionKeys;
+
+        // remove the existing value, the key is considered represented as a connection
+        delete document[fieldName];
       }
     }
   }

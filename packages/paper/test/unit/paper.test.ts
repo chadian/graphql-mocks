@@ -60,7 +60,7 @@ describe('mutation operations', () => {
   });
 
   it('can connect one document to another', async () => {
-    await paper.mutate(({ create, connect }) => {
+    await paper.mutate(({ create }) => {
       const ronald = create('Person', {
         name: 'Ronald',
       });
@@ -69,7 +69,7 @@ describe('mutation operations', () => {
         name: 'June',
       });
 
-      connect([ronald, 'bestFriend'], [june]);
+      ronald.bestFriend = june;
     });
 
     const ronald = paper.data.Person.find((person) => person.name === 'Ronald');
@@ -86,7 +86,7 @@ describe('data', () => {
   beforeEach(async () => {
     paper = new Paper(graphqlSchema);
 
-    await paper.mutate(({ create, connect }) => {
+    await paper.mutate(({ create }) => {
       const ronald = create('Person', {
         name: 'Ronald',
       });
@@ -95,7 +95,8 @@ describe('data', () => {
         name: 'Jessica',
       });
 
-      connect([ronald, 'bestFriend'], [jessica, 'bestFriend']);
+      ronald.bestFriend = jessica;
+      jessica.bestFriend = ronald;
     });
   });
 
