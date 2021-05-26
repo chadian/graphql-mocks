@@ -6,8 +6,6 @@ import { expect } from 'chai';
 import { getDocumentKey } from '../../src/utils/get-document-key';
 import { RemoveEvent } from '../../src/events/remove';
 import { ModifyEvent } from '../../src/events/modify-document';
-import { ConnectEvent } from '../../src/events/connect';
-import { DisconnectEvent } from '../../src/events/disconnect';
 
 const schemaString = `
   schema {
@@ -158,61 +156,6 @@ describe('happy path', () => {
       expect(team?.nullList).to.deep.equal([null, null, { id: '1', email: 'windows95@aol.com' }]);
     });
 
-    it('captures connect events', async () => {
-      paper.events.addEventListener('connect', (e) => events.push(e));
-
-      await paper.mutate(({ create }) => {
-        const app = create('App', {
-          id: '1',
-          name: 'my-fancy-app',
-        });
-
-        app.owner = account;
-      });
-
-      const app = paper.find('App', (document) => document.id === '1');
-      expect(app?.name).to.equal('my-fancy-app');
-      expect(app?.owner?.email).to.equal('windows95@aol.com');
-      expect(events).to.have.lengthOf(1);
-
-      const [connectEvent] = events;
-      expect(connectEvent.name).to.equal('connect');
-      expect((connectEvent as ConnectEvent).field).to.equal('owner');
-      expect((connectEvent as ConnectEvent).document.name).to.equal('my-fancy-app');
-      expect((connectEvent as ConnectEvent).connectedTo?.email).to.equal('windows95@aol.com');
-    });
-
-    it('disconnects a connected document', async () => {
-      let app: Document;
-      paper.events.addEventListener('disconnect', (e) => events.push(e));
-
-      await paper.mutate(({ create }) => {
-        app = create('App', {
-          id: '1',
-          name: 'my-fancy-app',
-        });
-
-        app.owner = account;
-        app.secondaryOwner = create('Account', {
-          id: '2',
-          email: 'secondary-owner@megacorp.com',
-        });
-      });
-
-      await paper.mutate(({ find }) => {
-        const $app = find(app);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        $app!.secondaryOwner = null;
-      });
-
-      expect(events).to.have.length(1);
-      const disconnectEvent = events?.[0] as DisconnectEvent;
-      expect(disconnectEvent.name).to.equal('disconnect');
-      expect(disconnectEvent.field).to.equal('secondaryOwner');
-      expect(disconnectEvent.document.name).to.equal('my-fancy-app');
-      expect(disconnectEvent.disconnectedFrom.email).to.equal('secondary-owner@megacorp.com');
-    });
-
     it('edits an existing document', async () => {
       const originalAccount = account;
       paper.events.addEventListener('modify', (e) => events.push(e));
@@ -272,38 +215,6 @@ describe('happy path', () => {
       expect((events[0] as RemoveEvent).document?.id).to.deep.equal('1');
       expect((events[0] as RemoveEvent).document?.email).to.deep.equal('windows95@aol.com');
     });
-
-    // it('disconnects existing documents upon removal', async () => {
-    //   let app: Document | null = null;
-
-    //   paper.events.addEventListener('remove', (e) => events.push(e));
-    //   paper.events.addEventListener('disconnect', (e) => events.push(e));
-
-    //   await paper.mutate(({ create }) => {
-    //     app = create('App', {
-    //       id: 'app-id',
-    //       name: 'the-coolest-app',
-    //       owner: account,
-    //     });
-    //   });
-
-    //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    //   expect(paper.findDocument(app!)).to.exist;
-
-    //   await paper.mutate(({ remove }) => {
-    //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    //     remove(app!);
-    //   });
-
-    //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    //   expect(paper.findDocument(app!)).to.not.exist;
-    //   expect(events).to.have.lengthOf(2);
-    //   const removeEvent = events[0];
-    //   const disconenctEvent = events[1];
-
-    //   expect(removeEvent.name).to.equal('remove');
-    //   expect(disconenctEvent.name).to.equal('disconnect');
-    // });
   });
 
   describe('validations', () => {

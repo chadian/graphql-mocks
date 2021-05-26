@@ -1,4 +1,4 @@
-import { Document, DocumentStore, KeyOrDocument } from '../types';
+import { Document, DocumentStore } from '../types';
 import { allDocuments } from '../utils/all-documents';
 import { findDocument } from '../utils/find-document';
 import { getDocumentKey } from '../utils/get-document-key';
@@ -6,9 +6,6 @@ import { CreateEvent } from './create';
 import { RemoveEvent } from './remove';
 import { diff as compareObjects } from 'just-diff';
 import { ModifyEvent } from './modify-document';
-import { getConnections } from '../utils/get-connections';
-import { ConnectEvent } from './connect';
-import { DisconnectEvent } from './disconnect';
 
 export type DocumentModifiedChange = {
   propertyName: string;
@@ -31,8 +28,6 @@ type CreateRemoveEventChanges = {
       [propertyName: string]: DocumentModifiedChange;
     };
   }[];
-  connections: { field: string; document: Document; connectedTo: Document }[];
-  disconnections: { field: string; document: Document; disconnectedFrom: Document }[];
 };
 
 function extractChanges(current: DocumentStore, previous: DocumentStore): CreateRemoveEventChanges {
@@ -64,50 +59,6 @@ function extractChanges(current: DocumentStore, previous: DocumentStore): Create
     })
     .filter(Boolean) as CreateRemoveEventChanges['modifiedDocuments'];
 
-  const { connections, disconnections } = [...previousKeys, ...created].reduce(
-    ({ connections, disconnections }, key) => {
-      const currentDocument = findDocument(current, key);
-      const existingDocument = findDocument(previous, key);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const currentConnections = currentDocument ? getConnections(currentDocument) : {};
-      const previousConnections = existingDocument ? getConnections(existingDocument) : {};
-
-      for (const field in { ...currentConnections, ...previousConnections }) {
-        const currentFieldConnections = currentConnections[field] ?? [];
-        const previousFieldConnections = previousConnections[field] ?? [];
-
-        const newConnections = currentFieldConnections
-          .filter((key) => !previousFieldConnections.includes(key))
-          .map((key: KeyOrDocument) => ({
-            field,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            document: currentDocument!,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            connectedTo: findDocument(current, key)!,
-          }));
-
-        const newDisconnections = previousFieldConnections
-          .filter((key) => !currentFieldConnections.includes(key))
-          .map((key: KeyOrDocument) => ({
-            field,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            document: currentDocument!,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            disconnectedFrom: findDocument(current, key)!,
-          }));
-
-        connections.push(...newConnections);
-        disconnections.push(...newDisconnections);
-      }
-
-      return { connections, disconnections };
-    },
-    { connections: [], disconnections: [] } as {
-      connections: { field: string; document: Document; connectedTo: Document }[];
-      disconnections: { field: string; document: Document; disconnectedFrom: Document }[];
-    },
-  );
-
   const createdDocuments = created.map((key) => ({
     document: findDocument(current, key) as Document,
   }));
@@ -120,35 +71,16 @@ function extractChanges(current: DocumentStore, previous: DocumentStore): Create
     createdDocuments: createdDocuments,
     removedDocuments,
     modifiedDocuments,
-    connections,
-    disconnections,
   };
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function dispatch(previous: DocumentStore, store: DocumentStore, eventTarget: EventTarget) {
-  previous;
-  store;
-  eventTarget;
+  const { createdDocuments, removedDocuments, modifiedDocuments } = extractChanges(store, previous);
 
-  const dispatchCreated = (document: Document) => eventTarget.dispatchEvent(new CreateEvent({ document, store }));
-  const dispatchRemoved = (document: Document) => eventTarget.dispatchEvent(new RemoveEvent({ document, store }));
-  const dispatchModified = (changes: DocumentModifiedChangeMap, document: Document) =>
-    eventTarget.dispatchEvent(new ModifyEvent({ document, store, changes }));
-  const dispatchConnected = (document: Document, field: string, connectedTo: Document) =>
-    eventTarget.dispatchEvent(new ConnectEvent({ document, field, connectedTo, store }));
-  const dispatchDisconnected = (document: Document, field: string, disconnectedFrom: Document) =>
-    eventTarget.dispatchEvent(new DisconnectEvent({ document, field, disconnectedFrom, store }));
-
-  const { createdDocuments, removedDocuments, modifiedDocuments, connections, disconnections } = extractChanges(
-    store,
-    previous,
-  );
-  createdDocuments.forEach(({ document }) => dispatchCreated(document));
-  removedDocuments.forEach(({ document }) => dispatchRemoved(document));
-  modifiedDocuments.forEach(({ changes, document }) => dispatchModified(changes, document));
-  connections.forEach(({ document, field, connectedTo }) => dispatchConnected(document, field, connectedTo));
-  disconnections.forEach(({ document, field, disconnectedFrom }) =>
-    dispatchDisconnected(document, field, disconnectedFrom),
+  createdDocuments.forEach(({ document }) => eventTarget.dispatchEvent(new CreateEvent({ document, store })));
+  removedDocuments.forEach(({ document }) => eventTarget.dispatchEvent(new RemoveEvent({ document, store })));
+  modifiedDocuments.forEach(({ changes, document }) =>
+    eventTarget.dispatchEvent(new ModifyEvent({ document, store, changes })),
   );
 }
