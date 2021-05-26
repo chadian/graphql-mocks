@@ -2,8 +2,8 @@
 
 ## TODO
 
-- [ ] setter/getter connected documents
-- [ ] Passthrough proxywrapped documents
+- [ ] set and get connected documents within mutations
+- [ ] Passthrough proxywrapped documents on mutation returns
 - [ ] Hooks
       - before/after transaction
       - CRUD
@@ -12,6 +12,8 @@
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface
 - [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
+- [ ] Improve tests around `create` operation edge cases
+- [ ] Add __typename getter to documents
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
 

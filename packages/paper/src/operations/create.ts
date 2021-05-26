@@ -1,8 +1,9 @@
-import { GraphQLNamedType, GraphQLObjectType } from 'graphql';
+import { GraphQLObjectType } from 'graphql';
 import { Document, DocumentPartial, OperationContext } from '../types';
 import { createDocument } from '../utils/create-document';
+import { findDocument } from '../utils/find-document';
 import { extractObjectTypes } from '../utils/graphql/extract-object-types';
-import { unwrap } from '../utils/graphql/unwrap';
+import { isDocument } from '../utils/is-document';
 
 export function createOperation(
   context: OperationContext,
@@ -22,11 +23,35 @@ export function createOperation(
     const field = gqlTypeFields[fieldName];
     const documentFieldValue = document[fieldName];
     const possibleObjectTypes = extractObjectTypes(schema, field.type);
+    const isExistingDocument = isDocument(documentFieldValue) && findDocument(store, documentFieldValue);
+
+    if (isExistingDocument && !field) {
+      throw new Error(
+        `Passed a document for ${fieldName} but there isn't a corresponding field for graphql type ${typename}`,
+      );
+    }
+
+    if (field && documentFieldValue && !isExistingDocument && possibleObjectTypes.length > 1) {
+      throw new Error(
+        `type ${typename}, field ${fieldName} is represented by multiple types: ${possibleObjectTypes.join(
+          ', ',
+        )}. Therefore, cannot create document automatically for: \n\n ${JSON.stringify(
+          documentFieldValue,
+          null,
+          2,
+        )}.\n\nUse the \`create\` function within mutate to explicitly create this document with one of possible types (${possibleObjectTypes.join(
+          ', ',
+        )}) and assign the connection explictly.`,
+      );
+    }
 
     // TODO: Handle List document values
     if (field && documentFieldValue && possibleObjectTypes.length === 1) {
-      const fieldDocument = createOperation(context, (unwrap(field.type) as GraphQLNamedType).name, documentFieldValue);
-      document[fieldName] = fieldDocument;
+      const [typeToCreate] = possibleObjectTypes;
+
+      document[fieldName] = isExistingDocument
+        ? documentFieldValue
+        : createOperation(context, typeToCreate.name, documentFieldValue);
     }
   }
 

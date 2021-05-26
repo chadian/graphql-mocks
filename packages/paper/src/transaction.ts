@@ -9,7 +9,7 @@ export async function transaction<T extends OperationMap>(
   contextualOperations: T,
   fn: TransactionCallback<T>,
 ): Promise<ReturnType<TransactionCallback<T>>> {
-  expandConnections(draft);
+  expandConnections(schema, draft);
   const context = { schema, store: draft };
 
   const boundOperations: BoundOperationMap<T> = {} as BoundOperationMap<T>;

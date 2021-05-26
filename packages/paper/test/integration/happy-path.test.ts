@@ -24,7 +24,7 @@ const schemaString = `
   type Team {
     id: ID!
     name: String!
-    owner: Account!
+    admin: Account!
     nullList: [Account]
   }
 
@@ -109,6 +109,30 @@ describe('happy path', () => {
       expect(events[0]?.document?.email).to.equal('macos9@aol.com');
     });
 
+    it('can hop multiple document connections within mutation transactions', async () => {
+      await paper.mutate(({ create, find }) => {
+        const $account = find(account);
+
+        const team = create('Team', {
+          id: '1',
+          name: 'my-fancy-app',
+          admin: $account,
+        });
+
+        create('App', {
+          id: '1',
+          name: 'my-fancy-app',
+          owner: team,
+        });
+      });
+
+      await paper.mutate(({ getDocumentsForType }) => {
+        const apps = getDocumentsForType('App');
+        const app = apps.find((app: Document) => app.id === '1');
+        expect(app.owner?.admin?.email).to.equal('windows95@aol.com');
+      });
+    });
+
     it('creates a new document with a connected document, implictly on property', async () => {
       await paper.mutate(({ create }) => {
         create('App', {
@@ -143,7 +167,7 @@ describe('happy path', () => {
         const team = create('Team', {
           id: '1',
           name: 'my-fancy-app',
-          owner: {
+          admin: {
             id: '2',
             email: 'test@aol.com',
           },
