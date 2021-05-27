@@ -6,16 +6,18 @@
 - [ ] Passthrough proxywrapped documents on mutation returns
 - [ ] Hooks
       - before/after transaction
-      - CRUD
+      - create/update/delete
+          - auto increment ID hook
 - [ ] initialize store for known graphql types from schema
 - [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
-      - * Maybe a `skipMissingType` option on the validator interface
-- [ ] create/connect/remove hooks -> with auto increment ID fields (make configurable)
+      - * Maybe a `skipMissingType` option on the validator interface and configuration
 - [ ] Improve tests around `create` operation edge cases
-- [ ] Add __typename getter to documents
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
+- [ ] Clean up the mutation and Paper get document interfaces
+- [ ] Handle flagging deletions within a transaction instead of instant removal
+- [ ] Create cloneDocument util and operation
 
 ## DONE
 
@@ -33,3 +35,4 @@
 - [X] Capture events from transaction
 - [X] unique ID field validator
 - [X] Passthrough return from transaction to mutate
+- [X] Add __typename getter to documents

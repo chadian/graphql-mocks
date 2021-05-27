@@ -9,7 +9,7 @@ export function createDocument<T extends Document = Document>(
   partial: Record<string | symbol, any>,
   key?: string,
 ): T {
-  return {
+  const document = {
     ...partial,
 
     [DOCUMENT_GRAPHQL_TYPENAME]: typename,
@@ -19,5 +19,20 @@ export function createDocument<T extends Document = Document>(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [DOCUMENT_KEY_SYMBOL]: partial[DOCUMENT_KEY_SYMBOL as any] ?? key ?? generateDocumentKey(),
-  } as T;
+  };
+
+  Object.defineProperty(document, '__typename', {
+    configurable: false,
+    enumerable: false,
+
+    get() {
+      return typename;
+    },
+
+    set() {
+      throw new Error('__typename on the document cannot be set');
+    },
+  });
+
+  return document as T;
 }

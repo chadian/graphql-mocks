@@ -19,6 +19,7 @@ export type Document = {
   [DOCUMENT_KEY_SYMBOL]: DocumentKey;
   [DOCUMENT_CONNECTIONS_SYMBOL]: ConnectionsMap;
   [DOCUMENT_GRAPHQL_TYPENAME]: GraphQLTypeName;
+  __typename?: string;
 };
 
 export type DocumentPartial = Partial<Document>;

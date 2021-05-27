@@ -61,6 +61,10 @@ describe('happy path', () => {
   });
 
   describe('look ups', () => {
+    it('provides a __typename property via the document', () => {
+      expect(account.__typename).to.equal('Account');
+    });
+
     it('looks up a document on the store via find', () => {
       const account = paper.find('Account', (account) => account.id === '1') as Document;
       expect(account.id).to.equal('1');
@@ -81,6 +85,13 @@ describe('happy path', () => {
   });
 
   describe('mutations', () => {
+    it('provides __typename on documents within #mutate', async () => {
+      await paper.mutate(({ find }) => {
+        const $account = find(account);
+        expect($account?.__typename).to.equal('Account');
+      });
+    });
+
     it('returns the transaction payload from #mutate', async () => {
       const payload = await paper.mutate(() => {
         return 'from the transaction';
