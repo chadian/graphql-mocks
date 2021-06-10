@@ -32,11 +32,16 @@ export function createOperation(
     const hasObjectReferences = possibleObjectTypes.length > 0;
     const isSingularConnection = hasObjectReferences && !extractListType(field.type);
 
+    if (!hasObjectReferences) {
+      document[fieldName] = documentFieldValue;
+      continue;
+    }
+
     if (documentFieldValue != null) {
       const connectionCandidates = Array.isArray(documentFieldValue) ? documentFieldValue : [documentFieldValue];
 
       const connectionDocuments = connectionCandidates.map((candidate) => {
-        const isExistingDocument = isDocument(candidate) && findDocument(store, documentFieldValue);
+        const isExistingDocument = isDocument(candidate) && findDocument(store, candidate) !== undefined;
 
         if (isExistingDocument || candidate === null) {
           return candidate;
@@ -56,7 +61,9 @@ export function createOperation(
           );
         }
 
-        return createOperation(context, (field.type as GraphQLObjectType).name, candidate);
+        const [fieldObjectType] = possibleObjectTypes;
+        const result = createOperation(context, fieldObjectType.name, candidate);
+        return result;
       });
 
       // Technically a singular connection field with multiple documents isn't
@@ -64,6 +71,7 @@ export function createOperation(
       // is only concerned with automatically creating documents that don't exist
       document[fieldName] =
         isSingularConnection && connectionDocuments.length === 1 ? connectionDocuments[0] : connectionDocuments;
+      continue;
     }
   }
 

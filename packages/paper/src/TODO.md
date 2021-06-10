@@ -1,11 +1,11 @@
 # TASKS
 
 ## TODO
-- [ ] Improve tests around `create` operation edge cases for nested documents
-- [ ] Passthrough proxywrapped documents on mutation returns
+
 - [ ] Add async queue for each transactions with FIFO
 - [ ] Hooks - before/after transaction
 - [ ] Hooks - create/update/delete document operations
+- [ ] Passthrough proxywrapped documents on mutation returns
 - [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface and configuration
@@ -37,3 +37,4 @@
 - [X] Improve tests around connection proxy
 - [X] initialize store for known graphql types from schema
 - [X] Add tests around collapsing connections
+- [X] Improve tests around `create` operation edge cases for nested documents

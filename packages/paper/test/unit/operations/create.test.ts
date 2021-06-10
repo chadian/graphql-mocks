@@ -70,17 +70,40 @@ describe('operations/create', () => {
     expect(context.store.Song).to.deep.equal([song, newSong]);
   });
 
-  it.only('creates a document, automatically creating document for non-existing list connection', () => {
+  it('creates a document, automatically creating document for non-existing list connection', () => {
     const album = createOperation(context, 'Album', {
       title: 'Gone Now',
       songs: [song, { title: 'All my Heroes' }, { title: 'Goodmorning' }],
     });
 
     const [existingSong, firstNewSong, secondNewSong] = album.songs;
+    expect(existingSong.title).to.equal("Don't take the money");
     expect(firstNewSong.title).to.equal('All my Heroes');
     expect(secondNewSong.title).to.equal('Goodmorning');
     expect(context.store.Album).to.deep.equal([album]);
     expect(context.store.Song).to.deep.equal([existingSong, firstNewSong, secondNewSong]);
+  });
+
+  it('creates a document, preserving null values in singular connection', () => {
+    const album = createOperation(context, 'Album', {
+      title: 'Gone Now',
+      titleTrack: null,
+    });
+
+    expect(album.titleTrack).to.equal(null);
+    expect(context.store.Album).to.deep.equal([album]);
+    expect(context.store.Song).to.deep.equal([song]);
+  });
+
+  it('creates a document, preserving null values in list connections', () => {
+    const album = createOperation(context, 'Album', {
+      title: 'Gone Now',
+      songs: [null, song],
+    });
+
+    expect(context.store.Album).to.deep.equal([album]);
+    expect(context.store.Song).to.deep.equal([song]);
+    expect(album.songs).to.deep.equal([null, song]);
   });
 
   it('throws an error when it cannot automatically create a document for an abstract type', () => {
