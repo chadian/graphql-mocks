@@ -57,7 +57,7 @@ describe('happy path', () => {
     });
 
     events = [];
-    account = paper.find('Account', (account) => account.id === '1') as Document;
+    account = paper.data.Account.find((account) => account.id === '1') as Document;
   });
 
   describe('look ups', () => {
@@ -66,13 +66,13 @@ describe('happy path', () => {
     });
 
     it('looks up a document on the store via find', () => {
-      const account = paper.find('Account', (account) => account.id === '1') as Document;
+      const account = paper.data.Account.find((account) => account.id === '1') as Document;
       expect(account.id).to.equal('1');
       expect(account.email).to.equal('windows95@aol.com');
     });
 
     it('looks up a document on the store via findDocument', () => {
-      const foundAccount = paper.findDocument(account) as Document;
+      const foundAccount = paper.find(account) as Document;
       expect(foundAccount.id).to.equal('1');
       expect(foundAccount.email).to.equal('windows95@aol.com');
     });
@@ -110,7 +110,7 @@ describe('happy path', () => {
         });
       });
 
-      const account = paper.find('Account', (document) => document.id === '2');
+      const account = paper.data.Account.find((document) => document.id === '2');
       expect(account?.id).to.equal('2');
       expect(account?.email).to.equal('macos9@aol.com');
 
@@ -153,7 +153,7 @@ describe('happy path', () => {
         });
       });
 
-      const app = paper.find('App', (document) => document.id === '1');
+      const app = paper.data.App.find((document) => document.id === '1');
       expect(app?.name).to.equal('my-fancy-app');
       expect(app?.owner?.email).to.equal('windows95@aol.com');
     });
@@ -168,7 +168,7 @@ describe('happy path', () => {
         app.owner = account;
       });
 
-      const app = paper.find('App', (document) => document.id === '1');
+      const app = paper.data.App.find((document) => document.id === '1');
       expect(app?.name).to.equal('my-fancy-app');
       expect(app?.owner?.email).to.equal('windows95@aol.com');
     });
@@ -187,7 +187,7 @@ describe('happy path', () => {
         team.nullList = [null, null, account];
       });
 
-      const team = paper.find('Team', (document) => document.id === '1');
+      const team = paper.data.Team.find((document) => document.id === '1');
       expect(team?.nullList).to.deep.equal([null, null, { id: '1', email: 'windows95@aol.com' }]);
     });
 
@@ -206,7 +206,7 @@ describe('happy path', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const updatedAccount = paper.find('Account', (document) => document.id === '5')!;
+      const updatedAccount = paper.data.Account.find((document) => document.id === '5')!;
       expect(getDocumentKey(originalAccount)).to.equal(getDocumentKey(updatedAccount));
       expect(originalAccount.email).to.equal('windows95@aol.com');
       expect(updatedAccount.email).to.equal('beos@aol.com');

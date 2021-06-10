@@ -16,7 +16,7 @@ export function removeOperation(context: OperationContext, keyOrDocument: KeyOrD
   });
 
   if (!document) {
-    throw new Error(`Could not find document ${key} to remove`);
+    throw new Error(`Could not find document with ${key} to remove`);
   }
 
   return document;

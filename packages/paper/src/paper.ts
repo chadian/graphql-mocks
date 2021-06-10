@@ -14,7 +14,6 @@ import {
 } from './types';
 import { createDocumentStore } from './utils/create-document-store';
 import { findDocument } from './utils/find-document';
-import { isDocument } from './utils/is-document';
 import { proxyWrap } from './utils/proxy-wrap';
 import { validate } from './validations/validate';
 import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
@@ -32,8 +31,9 @@ import { uniqueIdFieldValidator } from './validations/validators/unique-id';
 setAutoFreeze(false);
 
 export class Paper<UserOperations extends OperationMap = OperationMap> {
-  history: DocumentStore[] = [];
-  current: DocumentStore;
+  protected history: DocumentStore[] = [];
+  protected current: DocumentStore = createDocumentStore();
+  protected sourceGrapQLSchema: GraphQLSchema;
 
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
 
@@ -48,11 +48,8 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   operations: typeof defaultOperations & UserOperations;
   events = new EventTarget();
 
-  private sourceGrapQLSchema: GraphQLSchema;
-
   constructor(graphqlSchema: GraphQLSchema, options?: { operations?: UserOperations }) {
     this.sourceGrapQLSchema = graphqlSchema;
-    this.current = createDocumentStore();
 
     this.operations = {
       ...(options?.operations as UserOperations),
@@ -61,18 +58,11 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   }
 
   get data(): DocumentStore {
-    return proxyWrap(this.current, this.current);
+    return proxyWrap(this.sourceGrapQLSchema, this.current);
   }
 
-  findDocument(documentOrKey: KeyOrDocument): Document | undefined {
-    const result = findDocument(this.current, documentOrKey);
-    return isDocument(result) ? proxyWrap(this.current, result) : result;
-  }
-
-  find(typename: string, findFunction: (doc: Document) => boolean): Document | undefined {
-    const typeDocuments = this.current[typename] ?? [];
-    const result = typeDocuments.find(findFunction);
-    return isDocument(result) ? proxyWrap(this.current, result) : result;
+  find(documentOrKey: KeyOrDocument): Document | undefined {
+    return findDocument(this.data, documentOrKey);
   }
 
   validate(_store?: DocumentStore): void {

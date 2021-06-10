@@ -1,23 +1,22 @@
 # TASKS
 
 ## TODO
-
-- [ ] set and get connected documents within mutations
-- [ ] Passthrough proxywrapped documents on mutation returns
-- [ ] Hooks
-      - before/after transaction
-      - create/update/delete
-          - auto increment ID hook
+- [ ] Improve tests around connection proxy
+- [ ] Represent connections as Connection[] | null to make distinction between a connection to null and a list with one null document
+- [ ] Improve tests around `create` operation edge cases for nested documents
 - [ ] initialize store for known graphql types from schema
+- [ ] Passthrough proxywrapped documents on mutation returns
+- [ ] Add async queue for each transactions with FIFO
+- [ ] Hooks - before/after transaction
+- [ ] Hooks - create/update/delete document operations
 - [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
       - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface and configuration
-- [ ] Improve tests around `create` operation edge cases
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
-- [ ] Clean up the mutation and Paper get document interfaces
-- [ ] Handle flagging deletions within a transaction instead of instant removal
 - [ ] Create cloneDocument util and operation
+- [ ] `connect` (and maybe `disconnect`) event
+- [ ] Hooks - auto ID hook (if ID has not been set, create a hash)
 
 ## DONE
 
@@ -36,3 +35,5 @@
 - [X] unique ID field validator
 - [X] Passthrough return from transaction to mutate
 - [X] Add __typename getter to documents
+- [X] set and get connected documents within mutations
+- [X] Create consolidated interface `find` and `findDocument` on paper instance and within `mutate`

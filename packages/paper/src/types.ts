@@ -1,11 +1,5 @@
 import { GraphQLField, GraphQLObjectType, GraphQLSchema } from 'graphql';
-import {
-  DOCUMENT_CONNECTIONS_SYMBOL,
-  DOCUMENT_KEY_SYMBOL,
-  DOCUMENT_GRAPHQL_TYPENAME,
-  DOCUMENT_INTERNAL_TYPE,
-} from './constants';
-import { nullDocument } from './utils/null-document';
+import { DOCUMENT_CONNECTIONS_SYMBOL, DOCUMENT_KEY_SYMBOL, DOCUMENT_GRAPHQL_TYPENAME } from './constants';
 
 // documents
 
@@ -19,7 +13,7 @@ export type Document = {
   [DOCUMENT_KEY_SYMBOL]: DocumentKey;
   [DOCUMENT_CONNECTIONS_SYMBOL]: ConnectionsMap;
   [DOCUMENT_GRAPHQL_TYPENAME]: GraphQLTypeName;
-  __typename?: string;
+  __typename: string;
 };
 
 export type DocumentPartial = Partial<Document>;
@@ -31,9 +25,7 @@ type Connections = Array<DocumentKey>;
 
 // store
 
-export type DocumentStore<Typename extends string = string> = Record<Typename, Document[]> & {
-  [DOCUMENT_INTERNAL_TYPE]: [typeof nullDocument];
-};
+export type DocumentStore<Typename extends string = string> = Record<Typename, Document[]>;
 
 // operations
 
