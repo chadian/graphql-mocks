@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { buildSchema } from 'graphql';
-import { collapseConnections } from '../../../src/utils/collapse-connections';
-import { createConnectionProxy } from '../../../src/utils/create-connection-proxy';
-import { createDocument } from '../../../src/utils/create-document';
-import { createDocumentStore } from '../../../src/utils/create-document-store';
+import { collapseConnections } from '../../../src/document/collapse-connections';
+import { createConnectionProxy } from '../../../src/document/create-connection-proxy';
+import { createDocument } from '../../../src/document/create-document';
+import { createDocumentStore } from '../../../src/store/create-document-store';
 import { Document, DocumentStore } from '../../../src/types';
 
 const createSchema = (songField: string) =>

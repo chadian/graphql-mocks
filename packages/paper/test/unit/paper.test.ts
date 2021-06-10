@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Paper } from '../../src/paper';
-import { getDocumentKey } from '../../src/utils/get-document-key';
-import { getConnections } from '../../src/utils/get-connections';
+import { getDocumentKey } from '../../src/document/get-document-key';
+import { getConnections } from '../../src/document/get-connections';
 import { buildSchema } from 'graphql';
 
 const schemaString = `

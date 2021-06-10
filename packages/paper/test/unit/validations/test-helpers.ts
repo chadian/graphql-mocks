@@ -1,8 +1,8 @@
 import { buildSchema, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { FieldValidator } from '../../../src/types';
-import { createDocument } from '../../../src/utils/create-document';
-import { createDocumentStore } from '../../../src/utils/create-document-store';
-import { getConnections } from '../../../src/utils/get-connections';
+import { createDocumentStore } from '../../../src/store/create-document-store';
+import { getConnections } from '../../../src/document/get-connections';
+import { createDocument } from '../../../src/document/create-document';
 
 export function buildTestSchema(personFields?: string): GraphQLSchema {
   personFields = personFields ?? `name: String`;

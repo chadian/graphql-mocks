@@ -1,6 +1,6 @@
 import { Document, KeyOrDocument, OperationContext } from '../types';
-import { findDocument } from '../utils/find-document';
-import { getDocumentKey } from '../utils/get-document-key';
+import { findDocument } from '../store/find-document';
+import { getDocumentKey } from '../document/get-document-key';
 
 export function findOperation(context: OperationContext, keyOrDocument: KeyOrDocument): Document | undefined {
   const { store } = context;

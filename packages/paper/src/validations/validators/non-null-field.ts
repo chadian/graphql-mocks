@@ -1,6 +1,6 @@
 import { isNonNullType } from 'graphql';
 import { FieldValidator } from '../../types';
-import { key as nullDocumentKey } from '../../utils/null-document';
+import { key as nullDocumentKey } from '../../document/null-document';
 import { FieldReturnTypeMismatch } from '../errors/field-return-type-mismatch';
 
 export const nonNullFieldValidator: FieldValidator = {

@@ -1,11 +1,10 @@
 import { GraphQLSchema, isObjectType } from 'graphql';
-import { typeExists } from '../utils/graphql/type-exists';
+import { typeExists } from '../graphql/type-exists';
 import { TypeDoesNotExist } from './errors/type-does-not-exist';
 import { TypeIsNotDocumentCompatible } from './errors/type-is-not-document-compatible';
-import { getDocumentTypename } from '../utils/get-document-typename';
 import { DocumentStore, Document, DocumentTypeValidator, FieldValidator } from '../types';
 import { validateField } from './validate-field';
-import { isNullDocument } from '../utils/null-document';
+import { isNullDocument } from '../document/null-document';
 
 export function validate(
   graphqlSchema: GraphQLSchema,
@@ -17,7 +16,7 @@ export function validate(
     return;
   }
 
-  const typeName = getDocumentTypename(document);
+  const typeName = document.__typename;
   const type = graphqlSchema.getType(typeName);
 
   if (!type) {

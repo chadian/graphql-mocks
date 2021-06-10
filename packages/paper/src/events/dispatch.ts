@@ -1,7 +1,7 @@
 import { Document, DocumentStore } from '../types';
-import { allDocuments } from '../utils/all-documents';
-import { findDocument } from '../utils/find-document';
-import { getDocumentKey } from '../utils/get-document-key';
+import { allDocuments } from '../store/all-documents';
+import { findDocument } from '../store/find-document';
+import { getDocumentKey } from '../document/get-document-key';
 import { CreateEvent } from './create';
 import { RemoveEvent } from './remove';
 import { diff as compareObjects } from 'just-diff';

@@ -1,5 +1,5 @@
 import { Document, KeyOrDocument, OperationContext } from '../types';
-import { getDocumentKey } from '../utils/get-document-key';
+import { getDocumentKey } from '../document/get-document-key';
 
 export function removeOperation(context: OperationContext, keyOrDocument: KeyOrDocument): Document {
   const { store } = context;

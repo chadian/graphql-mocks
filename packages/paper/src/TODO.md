@@ -1,8 +1,7 @@
 # TASKS
 
 ## TODO
-- [ ] Improve tests around connection proxy
-- [ ] Represent connections as Connection[] | null to make distinction between a connection to null and a list with one null document
+- [ ] Add tests around collapsing connections
 - [ ] Improve tests around `create` operation edge cases for nested documents
 - [ ] initialize store for known graphql types from schema
 - [ ] Passthrough proxywrapped documents on mutation returns
@@ -37,3 +36,4 @@
 - [X] Add __typename getter to documents
 - [X] set and get connected documents within mutations
 - [X] Create consolidated interface `find` and `findDocument` on paper instance and within `mutate`
+- [X] Improve tests around connection proxy

@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
 import { DOCUMENT_CONNECTIONS_SYMBOL } from '../../../../src/constants';
-import { createDocument } from '../../../../src/utils/create-document';
-import { key as nullDocumentKey } from '../../../../src/utils/null-document';
+import { createDocument } from '../../../../src/document/create-document';
+import { key as nullDocumentKey } from '../../../../src/document/null-document';
 import { nonNullFieldValidator } from '../../../../src/validations/validators/non-null-field';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 

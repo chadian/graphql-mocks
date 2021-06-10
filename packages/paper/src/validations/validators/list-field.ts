@@ -1,7 +1,7 @@
 import { isListType, isNullableType } from 'graphql';
 import { FieldValidator } from '../../types';
-import { extractListType } from '../../utils/graphql/extract-list-type';
-import { key as nullDocumentKey } from '../../utils/null-document';
+import { extractListType } from '../../graphql/extract-list-type';
+import { key as nullDocumentKey } from '../../document/null-document';
 import { FieldReturnTypeMismatch } from '../errors/field-return-type-mismatch';
 
 export const listFieldValidator: FieldValidator = {

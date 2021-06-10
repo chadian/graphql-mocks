@@ -1,9 +1,9 @@
 import { GraphQLObjectType } from 'graphql';
 import { Document, DocumentPartial, OperationContext } from '../types';
-import { createDocument } from '../utils/create-document';
-import { findDocument } from '../utils/find-document';
-import { extractObjectTypes } from '../utils/graphql/extract-object-types';
-import { isDocument } from '../utils/is-document';
+import { findDocument } from '../store/find-document';
+import { extractObjectTypes } from '../graphql/extract-object-types';
+import { isDocument } from '../document/is-document';
+import { createDocument } from '../document/create-document';
 
 export function createOperation(
   context: OperationContext,

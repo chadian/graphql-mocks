@@ -1,6 +1,6 @@
 import merge from 'lodash.merge';
 import { Document, DocumentPartial, KeyOrDocument, OperationContext } from '../types';
-import { getDocumentKey } from '../utils/get-document-key';
+import { getDocumentKey } from '../document/get-document-key';
 import { findOperation } from './find';
 
 export const putOperation = function putOperation(

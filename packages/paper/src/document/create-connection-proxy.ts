@@ -1,9 +1,9 @@
 import { GraphQLObjectType, GraphQLSchema, isNonNullType } from 'graphql';
-import { DocumentStore, Document } from '../types';
-import { getConnections } from '../utils/get-connections';
-import { findDocument } from './find-document';
-import { extractListType } from './graphql/extract-list-type';
-import { extractObjectTypes } from './graphql/extract-object-types';
+import { DocumentStore, Document, DocumentKey } from '../types';
+import { getConnections } from './get-connections';
+import { findDocument } from '../store/find-document';
+import { extractListType } from '../graphql/extract-list-type';
+import { extractObjectTypes } from '../graphql/extract-object-types';
 import { isNullDocument } from './null-document';
 
 export function createConnectionProxy(
@@ -29,7 +29,9 @@ export function createConnectionProxy(
         const isSingularConnection = !extractListType(field.type) && hasPossibleConnections;
         const connections = getConnections(document);
 
-        if (!Array.isArray(connections[prop])) {
+        if (connections[prop] === null) {
+          return null;
+        } else if (!Array.isArray(connections[prop])) {
           if (!isNonNull) {
             return null;
           } else if (isSingularConnection) {
@@ -43,17 +45,17 @@ export function createConnectionProxy(
               return writableDocumentsArray;
             }
           }
-        }
-
-        const connectedDocuments = connections[prop].map((key) => {
-          return isNullDocument(key) ? null : findDocument(store, key);
-        });
-
-        if (isSingularConnection) {
-          // only one connection expected, otherwise null
-          return connectedDocuments[0] ?? null;
         } else {
-          return connectedDocuments;
+          const connectedDocuments = (connections[prop] as Array<DocumentKey>).map((key) => {
+            return isNullDocument(key) ? null : findDocument(store, key);
+          });
+
+          if (isSingularConnection) {
+            // only one connection expected, otherwise null
+            return connectedDocuments[0] ?? null;
+          } else {
+            return connectedDocuments;
+          }
         }
       }
 

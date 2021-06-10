@@ -12,9 +12,9 @@ import {
   OperationMap,
   TransactionCallback,
 } from './types';
-import { createDocumentStore } from './utils/create-document-store';
-import { findDocument } from './utils/find-document';
-import { proxyWrap } from './utils/proxy-wrap';
+import { createDocumentStore } from './store/create-document-store';
+import { findDocument } from './store/find-document';
+import { proxyWrap } from './store/proxy-wrap';
 import { validate } from './validations/validate';
 import { exclusiveDocumentFieldsOnType } from './validations/validators/exclusive-document-fields-on-type';
 import { listFieldValidator } from './validations/validators/list-field';

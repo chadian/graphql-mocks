@@ -1,6 +1,6 @@
 import { GraphQLSchema } from 'graphql';
 import { DocumentStore } from '../types';
-import { createConnectionProxy } from './create-connection-proxy';
+import { createConnectionProxy } from '../document/create-connection-proxy';
 
 export function proxyWrap(schema: GraphQLSchema, originalStore: DocumentStore): DocumentStore {
   const store = {

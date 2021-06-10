@@ -1,5 +1,5 @@
 import { buildSchema, GraphQLObjectType } from 'graphql';
-import { extractListType } from '../../../../src/utils/graphql/extract-list-type';
+import { extractListType } from '../../../src/graphql/extract-list-type';
 import { expect } from 'chai';
 
 function buildTestSchema(personFields?: string) {

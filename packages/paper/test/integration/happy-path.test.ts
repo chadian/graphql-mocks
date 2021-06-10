@@ -3,7 +3,7 @@ import { Paper } from '../../src/paper';
 import { Document } from '../../src/types';
 import { buildSchema } from 'graphql';
 import { expect } from 'chai';
-import { getDocumentKey } from '../../src/utils/get-document-key';
+import { getDocumentKey } from '../../src/document/get-document-key';
 import { RemoveEvent } from '../../src/events/remove';
 import { ModifyEvent } from '../../src/events/modify-document';
 

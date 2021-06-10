@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
-import { createDocument } from '../../../../src/utils/create-document';
 import { buildTestSchema } from '../test-helpers';
 import { exclusiveDocumentFieldsOnType } from '../../../../src/validations/validators/exclusive-document-fields-on-type';
-import { createDocumentStore } from '../../../../src/utils/create-document-store';
+import { createDocumentStore } from '../../../../src/store/create-document-store';
+import { createDocument } from '../../../../src/document/create-document';
 
 it('throws if the document has a field that does not exist on the graphql type', () => {
   const graphqlSchema = buildTestSchema(`

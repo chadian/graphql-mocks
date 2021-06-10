@@ -2,8 +2,8 @@ import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { Document, DocumentStore } from '../types';
 import { getConnections } from './get-connections';
 import { getDocumentKey } from './get-document-key';
-import { extractListType } from './graphql/extract-list-type';
-import { extractObjectTypes } from './graphql/extract-object-types';
+import { extractListType } from '../graphql/extract-list-type';
+import { extractObjectTypes } from '../graphql/extract-object-types';
 import { isDocument } from './is-document';
 import { nullDocument } from './null-document';
 
@@ -30,8 +30,8 @@ export function collapseDocument(schema: GraphQLSchema, document: Document): voi
       continue;
     }
 
-    // skip undefined cannot be used as a connection value, only an explicit null
-    if (documentFieldValue === undefined) {
+    // skip undefined and null
+    if (documentFieldValue === undefined || documentFieldValue === null) {
       continue;
     }
 

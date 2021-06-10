@@ -1,5 +1,5 @@
 import { DocumentTypeValidator, FieldValidator } from '../types';
-import { getConnections } from '../utils/get-connections';
+import { getConnections } from '../document/get-connections';
 
 export const validateField: (fieldValidators: FieldValidator[]) => DocumentTypeValidator = (
   fieldValidators: FieldValidator[],

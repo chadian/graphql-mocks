@@ -1,6 +1,6 @@
 import { GraphQLNamedType } from 'graphql';
 import { FieldValidator } from '../../types';
-import { unwrap } from '../../utils/graphql/unwrap';
+import { unwrap } from '../../graphql/unwrap';
 
 export const uniqueIdFieldValidator: FieldValidator = {
   skipConnectionValue: true,

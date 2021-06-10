@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
-import { createDocument } from '../../../../src/utils/create-document';
-import { createDocumentStore } from '../../../../src/utils/create-document-store';
+import { createDocument } from '../../../../src/document/create-document';
+import { createDocumentStore } from '../../../../src/store/create-document-store';
 import { uniqueIdFieldValidator } from '../../../../src/validations/validators/unique-id';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 

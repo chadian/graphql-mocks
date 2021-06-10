@@ -1,5 +1,5 @@
 import { GraphQLField, GraphQLObjectType } from 'graphql';
-import { unwrap } from '../../utils/graphql/unwrap';
+import { unwrap } from '../../graphql/unwrap';
 
 export class FieldCannotConnectMultiple extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { GraphQLObjectType } from 'graphql';
-import { createDocument } from '../../../../src/utils/create-document';
+import { createDocument } from '../../../../src/document/create-document';
 import { objectFieldValidator } from '../../../../src/validations/validators/object-field';
 import { buildTestSchema, createMockFieldValidatorOptions } from '../test-helpers';
 

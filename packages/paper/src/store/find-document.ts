@@ -1,6 +1,6 @@
 import { DocumentStore, Document, KeyOrDocument } from '../types';
-import { allDocuments } from '../utils/all-documents';
-import { getDocumentKey } from './get-document-key';
+import { allDocuments } from './all-documents';
+import { getDocumentKey } from '../document/get-document-key';
 
 export function findDocument(data: DocumentStore, key: KeyOrDocument): Document | undefined {
   if (typeof key !== 'string') {
