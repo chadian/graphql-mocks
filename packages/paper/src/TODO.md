@@ -1,7 +1,6 @@
 # TASKS
 
 ## TODO
-- [ ] Add tests around collapsing connections
 - [ ] Improve tests around `create` operation edge cases for nested documents
 - [ ] Passthrough proxywrapped documents on mutation returns
 - [ ] Add async queue for each transactions with FIFO
@@ -37,3 +36,4 @@
 - [X] Create consolidated interface `find` and `findDocument` on paper instance and within `mutate`
 - [X] Improve tests around connection proxy
 - [X] initialize store for known graphql types from schema
+- [X] Add tests around collapsing connections

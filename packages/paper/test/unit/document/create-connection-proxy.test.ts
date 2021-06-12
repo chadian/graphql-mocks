@@ -30,7 +30,7 @@ describe('create-connection-proxy', () => {
   let song: Document;
   let album: Document;
   let store: DocumentStore;
-  
+
   beforeEach(() => {
     song = createDocument('Song', {
       title: 'I Wanna Get Better',
