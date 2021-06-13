@@ -4,6 +4,7 @@ import { findDocument } from '../store/find-document';
 import { extractObjectTypes } from '../graphql/extract-object-types';
 import { isDocument } from '../document/is-document';
 import { createDocument } from '../document/create-document';
+import { extractListType } from '../graphql/extract-list-type';
 
 export function createOperation(
   context: OperationContext,
@@ -21,37 +22,48 @@ export function createOperation(
 
   for (const fieldName in document) {
     const field = gqlTypeFields[fieldName];
+
+    if (!field) {
+      continue;
+    }
+
     const documentFieldValue = document[fieldName];
     const possibleObjectTypes = extractObjectTypes(schema, field.type);
-    const isExistingDocument = isDocument(documentFieldValue) && findDocument(store, documentFieldValue);
+    const hasObjectReferences = possibleObjectTypes.length > 0;
+    const isSingularConnection = hasObjectReferences && !extractListType(field.type);
 
-    if (isExistingDocument && !field) {
-      throw new Error(
-        `Passed a document for ${fieldName} but there isn't a corresponding field for graphql type ${typename}`,
-      );
-    }
+    if (documentFieldValue != null) {
+      const connectionCandidates = Array.isArray(documentFieldValue) ? documentFieldValue : [documentFieldValue];
 
-    if (field && documentFieldValue && !isExistingDocument && possibleObjectTypes.length > 1) {
-      throw new Error(
-        `type ${typename}, field ${fieldName} is represented by multiple types: ${possibleObjectTypes.join(
-          ', ',
-        )}. Therefore, cannot create document automatically for: \n\n ${JSON.stringify(
-          documentFieldValue,
-          null,
-          2,
-        )}.\n\nUse the \`create\` function within mutate to explicitly create this document with one of possible types (${possibleObjectTypes.join(
-          ', ',
-        )}) and assign the connection explictly.`,
-      );
-    }
+      const connectionDocuments = connectionCandidates.map((candidate) => {
+        const isExistingDocument = isDocument(candidate) && findDocument(store, documentFieldValue);
 
-    // TODO: Handle List document values
-    if (field && documentFieldValue && possibleObjectTypes.length === 1) {
-      const [typeToCreate] = possibleObjectTypes;
+        if (isExistingDocument || candidate === null) {
+          return candidate;
+        }
 
-      document[fieldName] = isExistingDocument
-        ? documentFieldValue
-        : createOperation(context, typeToCreate.name, documentFieldValue);
+        if (candidate && possibleObjectTypes.length > 1) {
+          throw new Error(
+            `The "${typename}" with field "${fieldName}" is represented by multiple types: ${possibleObjectTypes.join(
+              ', ',
+            )}. Therefore, cannot create document automatically for: \n\n ${JSON.stringify(
+              documentFieldValue,
+              null,
+              2,
+            )}.\n\nUse the \`create\` operation within mutate to explicitly create this document with one of possible types (${possibleObjectTypes.join(
+              ', ',
+            )}) and assign the connection explictly.`,
+          );
+        }
+
+        return createOperation(context, (field.type as GraphQLObjectType).name, candidate);
+      });
+
+      // Technically a singular connection field with multiple documents isn't
+      // allowed but this will be caught by the validations. The createOperation
+      // is only concerned with automatically creating documents that don't exist
+      document[fieldName] =
+        isSingularConnection && connectionDocuments.length === 1 ? connectionDocuments[0] : connectionDocuments;
     }
   }
 
