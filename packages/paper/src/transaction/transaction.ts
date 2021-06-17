@@ -1,7 +1,7 @@
-import { BoundOperationMap, DocumentStore, Operation, OperationMap, TransactionCallback } from './types';
+import { BoundOperationMap, DocumentStore, Operation, OperationMap, TransactionCallback } from '../types';
 import { GraphQLSchema } from 'graphql';
-import { expandConnections } from './document/expand-connections';
-import { collapseConnections } from './document/collapse-connections';
+import { collapseConnections } from '../document/collapse-connections';
+import { expandConnections } from '../document/expand-connections';
 
 export async function transaction<T extends OperationMap>(
   draft: DocumentStore,

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { buildSchema } from 'graphql';
-import { createDocumentStore } from "../../../src/store/create-document-store";
+import { createDocumentStore } from '../../../src/store/create-document-store';
 
 describe('create-connection-proxy', () => {
   it('returns an empty object when no schema is provided', () => {

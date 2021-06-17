@@ -2,7 +2,8 @@ import { GraphQLSchema } from 'graphql';
 import { produce, setAutoFreeze } from 'immer';
 import { dispatch } from './events/dispatch';
 import { defaultOperations } from './operations/index';
-import { transaction } from './transaction';
+import { transaction } from './transaction/transaction';
+import { Queue } from './transaction/queue';
 import {
   Document,
   DocumentStore,
@@ -34,6 +35,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   protected history: DocumentStore[] = [];
   protected current: DocumentStore = createDocumentStore();
   protected sourceGrapQLSchema: GraphQLSchema;
+  protected mutateQueue: Queue = new Queue();
 
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
 
@@ -65,7 +67,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     return findDocument(this.data, documentOrKey);
   }
 
-  validate(_store?: DocumentStore): void {
+  private validate(_store?: DocumentStore): void {
     const store = _store ?? this.current;
 
     Object.values(store).forEach((documents) => {
@@ -83,19 +85,23 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   }
 
   async mutate<T extends TransactionCallback<Paper['operations'] & UserOperations>>(fn: T): Promise<ReturnType<T>> {
-    let transactionPayload;
+    const { previous, finish } = this.mutateQueue.enqueue();
+    await previous;
 
-    const next = await produce(this.current, async (draft) => {
+    const current = this.current;
+    let transactionPayload;
+    const next = await produce(current, async (draft) => {
       const schema = this.sourceGrapQLSchema;
       const operations = this.operations;
       transactionPayload = await transaction<typeof operations>(draft, schema, operations, fn as T);
     });
 
     this.validate(next);
-    this.dispatchEvents(this.current, next);
+    this.dispatchEvents(current, next);
     this.current = next;
     this.history.push(next);
 
+    finish();
     return transactionPayload as ReturnType<T>;
   }
 }
