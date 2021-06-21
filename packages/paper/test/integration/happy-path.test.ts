@@ -144,7 +144,7 @@ describe('happy path', () => {
       });
     });
 
-    it('creates a new document with a connected document, implictly on property', async () => {
+    it('creates a new document with a connected document, implictly on property at creation', async () => {
       await paper.mutate(({ create }) => {
         create('App', {
           id: '1',
@@ -158,7 +158,7 @@ describe('happy path', () => {
       expect(app?.owner?.email).to.equal('windows95@aol.com');
     });
 
-    it('creates a new document with a connected document, explicitly by `connect`', async () => {
+    it('creates a new document with a connected document, explicitly by property reference', async () => {
       await paper.mutate(({ create }) => {
         const app = create('App', {
           id: '1',
@@ -195,14 +195,11 @@ describe('happy path', () => {
       const originalAccount = account;
       paper.events.addEventListener('modify', (e) => events.push(e));
 
-      await paper.mutate(({ find, put }) => {
-        const acc = find(account as Document);
-
+      await paper.mutate(({ find }) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        put(acc!, {
-          id: '5',
-          email: 'beos@aol.com',
-        });
+        const acc = find(account as Document)!;
+        acc.id = '5';
+        acc.email = 'beos@aol.com';
       });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -217,6 +214,20 @@ describe('happy path', () => {
       expect((event as ModifyEvent).document.email).to.equal('beos@aol.com');
       expect((event as ModifyEvent).changes.id.value).to.equal('5');
       expect((event as ModifyEvent).changes.id.previousValue).to.equal('1');
+    });
+
+    it('clones an existing document', async () => {
+      await paper.mutate(({ find, clone }) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const acc = find(account)!;
+        const cloned = clone(acc);
+        cloned.id = 'cloned';
+      });
+
+      const accounts = paper.data.Account;
+      expect(accounts).to.have.lengthOf(2);
+      expect(accounts[0].email).to.equal(account.email);
+      expect(accounts[1].email).to.equal(account.email);
     });
 
     it('supports promises within a mutate transaction', async () => {

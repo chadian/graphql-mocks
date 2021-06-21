@@ -1,7 +1,9 @@
 # TASKS
 
 ## TODO
-
+- [ ] Remove `put` operation
+- [ ] Remove `getDocumentsForType` and expose `store` directly
+- [ ] Prevent store from being pushed to directly via `data` property
 - [ ] Hooks - before/after transaction
 - [ ] Hooks - create/update/delete document operations
 - [ ] Passthrough proxywrapped documents on mutation returns
@@ -10,7 +12,6 @@
       - * Maybe a `skipMissingType` option on the validator interface and configuration
 - [ ] Factory helpers (add tests demonstrating how this would work)
 - [ ] Visualize documents & keys and connections only
-- [ ] Create cloneDocument util and operation
 - [ ] `connect` (and maybe `disconnect`) event
 - [ ] Hooks - auto ID hook (if ID has not been set, create a hash)
 - [ ] Hooks - be able to dispatch custom events
@@ -39,3 +40,4 @@
 - [X] Add tests around collapsing connections
 - [X] Improve tests around `create` operation edge cases for nested documents
 - [X] Add async queue for each transactions with FIFO
+- [X] Create cloneDocument util and operation
