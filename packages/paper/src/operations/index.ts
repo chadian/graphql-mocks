@@ -1,13 +1,13 @@
 import { createOperation } from './create';
 import { findOperation } from './find';
 import { removeOperation } from './remove';
-import { getDocumentsForTypeOperation } from './get-documents-for-type';
 import { cloneOperation } from './clone';
+import { getStoreOperation } from './get-store';
 
 export const defaultOperations = {
   create: createOperation,
   find: findOperation,
   remove: removeOperation,
-  getDocumentsForType: getDocumentsForTypeOperation,
   clone: cloneOperation,
+  getStore: getStoreOperation,
 };

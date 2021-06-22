@@ -1,8 +1,7 @@
 # TASKS
 
 ## TODO
-- [ ] Remove `getDocumentsForType` and expose `store` directly
-- [ ] Prevent store from being pushed to directly via `data` property
+
 - [ ] Hooks - before/after transaction
 - [ ] Hooks - create/update/delete document operations
 - [ ] Passthrough proxywrapped documents on mutation returns
@@ -41,3 +40,5 @@
 - [X] Add async queue for each transactions with FIFO
 - [X] Create cloneDocument util and operation
 - [X] Remove `put` operation
+- [X] Remove `getDocumentsForType` and expose `store` directly
+- [X] Prevent store from being pushed to directly via `data` property

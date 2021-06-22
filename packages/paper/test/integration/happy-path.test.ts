@@ -6,6 +6,7 @@ import { expect } from 'chai';
 import { getDocumentKey } from '../../src/document/get-document-key';
 import { RemoveEvent } from '../../src/events/remove';
 import { ModifyEvent } from '../../src/events/modify-document';
+import { createDocument } from '../../src/document/create-document';
 
 const schemaString = `
   schema {
@@ -137,9 +138,10 @@ describe('happy path', () => {
         });
       });
 
-      await paper.mutate(({ getDocumentsForType }) => {
-        const apps = getDocumentsForType('App');
-        const app = apps.find((app: Document) => app.id === '1');
+      await paper.mutate(({ getStore }) => {
+        const apps = getStore().App;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const app = apps.find((app: Document) => app.id === '1')!;
         expect(app.owner?.admin?.email).to.equal('windows95@aol.com');
       });
     });
@@ -261,6 +263,18 @@ describe('happy path', () => {
       expect((events[0] as RemoveEvent).document?.id).to.deep.equal('1');
       expect((events[0] as RemoveEvent).document?.email).to.deep.equal('windows95@aol.com');
     });
+
+    it('allows direct access to the store', async () => {
+      await paper.mutate(({ getStore }) => {
+        const store = getStore();
+        const accounts = store.Account;
+        expect(accounts).to.have.lengthOf(1);
+        expect(accounts[0].email).to.equal(account.email);
+        accounts[0].email = 'updated-email@yahoo.com';
+      });
+
+      expect(paper.data.Account[0].email).to.equal('updated-email@yahoo.com');
+    });
   });
 
   describe('validations', () => {
@@ -280,6 +294,12 @@ describe('happy path', () => {
       expect(caughtError.message).to.equal(
         'The field "email" represents a graphql "String! (non-null)" type and on the document should be a non-null, but got null',
       );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('throws an error when trying to push to a store directly', () => {
+      expect(() => paper.data.Account.push(createDocument('Account', {}))).to.throw();
     });
   });
 });

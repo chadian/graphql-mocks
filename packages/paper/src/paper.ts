@@ -34,7 +34,7 @@ setAutoFreeze(false);
 export class Paper<UserOperations extends OperationMap = OperationMap> {
   protected history: DocumentStore[] = [];
   protected current: DocumentStore = createDocumentStore();
-  protected sourceGrapQLSchema: GraphQLSchema;
+  protected sourceGraphQLSchema: GraphQLSchema;
   protected mutateQueue: Queue = new Queue();
 
   documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
@@ -51,7 +51,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   events = new EventTarget();
 
   constructor(graphqlSchema: GraphQLSchema, options?: { operations?: UserOperations }) {
-    this.sourceGrapQLSchema = graphqlSchema;
+    this.sourceGraphQLSchema = graphqlSchema;
 
     this.operations = {
       ...(options?.operations as UserOperations),
@@ -60,7 +60,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   }
 
   get data(): DocumentStore {
-    return proxyWrap(this.sourceGrapQLSchema, this.current);
+    return proxyWrap(this.sourceGraphQLSchema, this.current);
   }
 
   find(documentOrKey: KeyOrDocument): Document | undefined {
@@ -72,7 +72,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
 
     Object.values(store).forEach((documents) => {
       documents.forEach((document: Document) => {
-        validate(this.sourceGrapQLSchema, document, store, {
+        validate(this.sourceGraphQLSchema, document, store, {
           document: this.documentValidators,
           field: this.fieldValidators,
         });
@@ -91,7 +91,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     const current = this.current;
     let transactionPayload;
     const next = await produce(current, async (draft) => {
-      const schema = this.sourceGrapQLSchema;
+      const schema = this.sourceGraphQLSchema;
       const operations = this.operations;
       transactionPayload = await transaction<typeof operations>(draft, schema, operations, fn as T);
     });

@@ -10,6 +10,7 @@ export function proxyWrap(schema: GraphQLSchema, originalStore: DocumentStore): 
   for (const type in store) {
     if (Array.isArray(store[type])) {
       store[type] = store[type].map((document) => createConnectionProxy(schema, store, document));
+      Object.freeze(store[type]);
     }
   }
 
