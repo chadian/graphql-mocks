@@ -1,7 +1,6 @@
 # TASKS
 
 ## TODO
-- [ ] Remove `put` operation
 - [ ] Remove `getDocumentsForType` and expose `store` directly
 - [ ] Prevent store from being pushed to directly via `data` property
 - [ ] Hooks - before/after transaction
@@ -41,3 +40,4 @@
 - [X] Improve tests around `create` operation edge cases for nested documents
 - [X] Add async queue for each transactions with FIFO
 - [X] Create cloneDocument util and operation
+- [X] Remove `put` operation
