@@ -25,6 +25,7 @@
     "node": ">= 12.0.0"
   },
   "dependencies": {
+    "event-target-polyfill": "^0.0.3",
     "immer": "^8.0.0",
     "just-diff": "^3.1.1",
     "lodash.merge": "^4.6.2",

@@ -1,3 +1,7 @@
+// Until older versions of Node support EventTarget, this will
+// polyfill it
+import 'event-target-polyfill';
+
 import { GraphQLSchema } from 'graphql';
 import { produce, setAutoFreeze } from 'immer';
 import { dispatch } from './events/dispatch';
