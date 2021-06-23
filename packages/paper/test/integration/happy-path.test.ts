@@ -297,6 +297,66 @@ describe('happy path', () => {
     });
   });
 
+  describe('hooks', () => {
+    context('beforeTransaction', () => {
+      it('hooks', async () => {
+        let counter = 0;
+
+        paper.hooks.beforeTransaction.push(async ({ create }) => {
+          counter++;
+          create('Team', {
+            id: counter.toString(),
+            name: `The ${counter} team`,
+            admin: account,
+          });
+        });
+
+        await paper.mutate(async ({ getStore }) => {
+          expect(getStore().Team).to.have.lengthOf(1);
+        });
+
+        await paper.mutate(async ({ getStore }) => {
+          expect(getStore().Team).to.have.lengthOf(2);
+        });
+
+        expect(paper.data.Team).to.have.lengthOf(2);
+        expect(paper.data.Team[0].id).to.equal('1');
+        expect(paper.data.Team[0].name).to.equal('The 1 team');
+        expect(paper.data.Team[1].id).to.equal('2');
+        expect(paper.data.Team[1].name).to.equal('The 2 team');
+      });
+    });
+
+    context('afterTransaction', () => {
+      it('hooks', async () => {
+        let counter = 0;
+
+        paper.hooks.afterTransaction.push(async ({ create }) => {
+          counter++;
+          create('Team', {
+            id: counter.toString(),
+            name: `The ${counter} team`,
+            admin: account,
+          });
+        });
+
+        await paper.mutate(async ({ getStore }) => {
+          expect(getStore().Team).to.have.lengthOf(0);
+        });
+
+        await paper.mutate(async ({ getStore }) => {
+          expect(getStore().Team).to.have.lengthOf(1);
+        });
+
+        expect(paper.data.Team).to.have.lengthOf(2);
+        expect(paper.data.Team[0].id).to.equal('1');
+        expect(paper.data.Team[0].name).to.equal('The 1 team');
+        expect(paper.data.Team[1].id).to.equal('2');
+        expect(paper.data.Team[1].name).to.equal('The 2 team');
+      });
+    });
+  });
+
   describe('edge cases', () => {
     it('throws an error when trying to push to a store directly', () => {
       expect(() => paper.data.Account.push(createDocument('Account', {}))).to.throw();

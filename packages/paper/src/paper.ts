@@ -13,6 +13,7 @@ import {
   DocumentStore,
   DocumentTypeValidator,
   FieldValidator,
+  HooksMap,
   KeyOrDocument,
   OperationMap,
   TransactionCallback,
@@ -37,7 +38,7 @@ setAutoFreeze(false);
 
 export class Paper<UserOperations extends OperationMap = OperationMap> {
   protected history: DocumentStore[] = [];
-  protected current: DocumentStore = createDocumentStore();
+  protected current: DocumentStore;
   protected sourceGraphQLSchema: GraphQLSchema;
   protected mutateQueue: Queue = new Queue();
 
@@ -54,7 +55,13 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   operations: typeof defaultOperations & UserOperations;
   events = new EventTarget();
 
+  hooks: HooksMap<Paper['operations'] & UserOperations> = {
+    beforeTransaction: [],
+    afterTransaction: [],
+  };
+
   constructor(graphqlSchema: GraphQLSchema, options?: { operations?: UserOperations }) {
+    this.current = createDocumentStore(graphqlSchema);
     this.sourceGraphQLSchema = graphqlSchema;
 
     this.operations = {
@@ -93,11 +100,12 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     await previous;
 
     const current = this.current;
+    const hooks = this.hooks;
     let transactionPayload;
     const next = await produce(current, async (draft) => {
       const schema = this.sourceGraphQLSchema;
       const operations = this.operations;
-      transactionPayload = await transaction<typeof operations>(draft, schema, operations, fn as T);
+      transactionPayload = await transaction<typeof operations>(draft, schema, operations, hooks, fn as T);
     });
 
     this.validate(next);
