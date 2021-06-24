@@ -42,18 +42,19 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
   protected sourceGraphQLSchema: GraphQLSchema;
   protected mutateQueue: Queue = new Queue();
 
-  documentValidators: DocumentTypeValidator[] = [exclusiveDocumentFieldsOnType];
-
-  fieldValidators: FieldValidator[] = [
-    listFieldValidator,
-    nonNullFieldValidator,
-    objectFieldValidator,
-    scalarFieldValidator,
-    uniqueIdFieldValidator,
-  ];
-
   operations: typeof defaultOperations & UserOperations;
   events = new EventTarget();
+
+  validators: { document: DocumentTypeValidator[]; field: FieldValidator[] } = {
+    document: [exclusiveDocumentFieldsOnType],
+    field: [
+      listFieldValidator,
+      nonNullFieldValidator,
+      objectFieldValidator,
+      scalarFieldValidator,
+      uniqueIdFieldValidator,
+    ],
+  };
 
   hooks: HooksMap<Paper['operations'] & UserOperations> = {
     beforeTransaction: [],
@@ -83,10 +84,7 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
 
     Object.values(store).forEach((documents) => {
       documents.forEach((document: Document) => {
-        validate(this.sourceGraphQLSchema, document, store, {
-          document: this.documentValidators,
-          field: this.fieldValidators,
-        });
+        validate(this.sourceGraphQLSchema, document, store, this.validators);
       });
     });
   }

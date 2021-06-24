@@ -2,18 +2,14 @@
 
 ## TODO
 
-- [ ] Hooks - create/update/delete document operations
 - [ ] Hooks - add `queueEvent` to hooks and transactions
-- [ ] ?? Collapse validators on Paper to `validators.field` and `validators.document` ??
-- [ ] Passthrough proxywrapped documents on mutation returns
-- [ ] validator `enable`/`disable` or `add`/`remove` options on `Paper`
-      - [ ] Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
-      - * Maybe a `skipMissingType` option on the validator interface and configuration
-- [ ] Factory helpers (add tests demonstrating how this would work)
-- [ ] Visualize documents & keys and connections only
-- [ ] `connect` (and maybe `disconnect`) event
 - [ ] Hooks - auto ID hook (if ID has not been set, create a hash or auto-increment)
-- [ ] Hooks - be able to dispatch custom events
+- [ ] Passthrough proxywrapped documents on mutation returns
+- [ ] (create issue) validator `enable`/`disable` or `add`/`remove` options on `Paper`
+- [ ] (create issue) Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
+      - * Maybe a `skipMissingType` option on the validator interface and configuration
+- [ ] (create issue) Factory helpers (add tests demonstrating how this would work)
+- [ ] (create issue) Visualize documents & keys and connections only
 
 ## DONE
 
@@ -44,3 +40,4 @@
 - [X] Remove `getDocumentsForType` and expose `store` directly
 - [X] Prevent store from being pushed to directly via `data` property
 - [X] Hooks - before/after transaction
+- [X] Collapse validators on Paper to `validators.field` and `validators.document`
