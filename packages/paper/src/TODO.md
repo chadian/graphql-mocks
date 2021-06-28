@@ -2,9 +2,8 @@
 
 ## TODO
 
-- [ ] Hooks - add `queueEvent` to hooks and transactions
-- [ ] Hooks - auto ID hook (if ID has not been set, create a hash or auto-increment)
 - [ ] Passthrough proxywrapped documents on mutation returns
+- [ ] (create issue) Hooks - auto ID hook (if ID has not been set, create a hash or auto-increment)
 - [ ] (create issue) validator `enable`/`disable` or `add`/`remove` options on `Paper`
 - [ ] (create issue) Create documents that do not correspond with an GraphQL type (add tests demonstrating how this would work)
       - * Maybe a `skipMissingType` option on the validator interface and configuration
@@ -41,3 +40,5 @@
 - [X] Prevent store from being pushed to directly via `data` property
 - [X] Hooks - before/after transaction
 - [X] Collapse validators on Paper to `validators.field` and `validators.document`
+- [X] Hooks - add `queueEvent` to hooks and transactions
+

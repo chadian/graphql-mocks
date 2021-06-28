@@ -75,12 +75,14 @@ function extractChanges(current: DocumentStore, previous: DocumentStore): Create
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function dispatch(previous: DocumentStore, store: DocumentStore, eventTarget: EventTarget) {
+export function createStoreEvents(previous: DocumentStore, store: DocumentStore): Event[] {
   const { createdDocuments, removedDocuments, modifiedDocuments } = extractChanges(store, previous);
 
-  createdDocuments.forEach(({ document }) => eventTarget.dispatchEvent(new CreateEvent({ document, store })));
-  removedDocuments.forEach(({ document }) => eventTarget.dispatchEvent(new RemoveEvent({ document, store })));
-  modifiedDocuments.forEach(({ changes, document }) =>
-    eventTarget.dispatchEvent(new ModifyEvent({ document, store, changes })),
+  const createdEvents = createdDocuments.map(({ document }) => new CreateEvent({ document, store }));
+  const modifiedEvents = modifiedDocuments.map(
+    ({ changes, document }) => new ModifyEvent({ document, store, changes }),
   );
+  const removedEvents = removedDocuments.map(({ document }) => new RemoveEvent({ document, store }));
+
+  return [...createdEvents, ...modifiedEvents, ...removedEvents];
 }

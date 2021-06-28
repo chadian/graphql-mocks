@@ -78,6 +78,23 @@ describe('mutation operations', () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(getConnections(ronald!).bestFriend.includes(getDocumentKey(june!)!)).to.equal(true);
   });
+
+  it('can queue a custom event within a mutation', async () => {
+    const events: Event[] = [];
+    paper.events.addEventListener('hello', (e) => events.push(e));
+    await paper.mutate(({ queueEvent }) => queueEvent(new Event('hello')));
+    expect(events).to.have.lengthOf(1);
+    expect(events[0].type).to.equal('hello');
+  });
+
+  it('can queue a custom event within a hook', async () => {
+    const events: Event[] = [];
+    paper.events.addEventListener('hello', (e) => events.push(e));
+    paper.hooks.beforeTransaction.push(({ queueEvent }) => queueEvent(new Event('hello')));
+    await paper.mutate(() => 'noop');
+    expect(events).to.have.lengthOf(1);
+    expect(events[0].type).to.equal('hello');
+  });
 });
 
 describe('data', () => {

@@ -32,6 +32,7 @@ export type DocumentStore<Typename extends string = string> = Record<Typename, D
 export type OperationContext = {
   store: DocumentStore;
   schema: GraphQLSchema;
+  eventQueue: Event[];
 };
 
 export interface Operation {

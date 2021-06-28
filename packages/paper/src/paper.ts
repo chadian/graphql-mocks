@@ -4,7 +4,7 @@ import 'event-target-polyfill';
 
 import { GraphQLSchema } from 'graphql';
 import { produce, setAutoFreeze } from 'immer';
-import { dispatch } from './events/dispatch';
+import { createStoreEvents } from './events/dispatch';
 import { defaultOperations } from './operations/index';
 import { transaction } from './transaction/transaction';
 import { Queue } from './transaction/queue';
@@ -89,8 +89,9 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     });
   }
 
-  private dispatchEvents(previous: DocumentStore, store: DocumentStore) {
-    dispatch(previous, store, this.events);
+  private dispatchEvents(events: Event[]) {
+    const eventsTarget = this.events;
+    events.forEach((event) => eventsTarget.dispatchEvent(event));
   }
 
   async mutate<T extends TransactionCallback<Paper['operations'] & UserOperations>>(fn: T): Promise<ReturnType<T>> {
@@ -99,19 +100,31 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
 
     const current = this.current;
     const hooks = this.hooks;
-    let transactionPayload;
+    let result: unknown;
+    let customEvents: Event[] = [];
+
     const next = await produce(current, async (draft) => {
       const schema = this.sourceGraphQLSchema;
       const operations = this.operations;
-      transactionPayload = await transaction<typeof operations>(draft, schema, operations, hooks, fn as T);
+      const { transactionResult, eventQueue } = await transaction<typeof operations>(
+        draft,
+        schema,
+        operations,
+        hooks,
+        fn as T,
+      );
+
+      result = transactionResult;
+      customEvents = eventQueue;
     });
 
     this.validate(next);
-    this.dispatchEvents(current, next);
+    const storeEvents = createStoreEvents(current, next);
+    this.dispatchEvents([...storeEvents, ...customEvents]);
     this.current = next;
     this.history.push(next);
 
     finish();
-    return transactionPayload as ReturnType<T>;
+    return result as ReturnType<T>;
   }
 }

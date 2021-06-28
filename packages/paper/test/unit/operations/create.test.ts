@@ -36,6 +36,7 @@ describe('operations/create', () => {
     context = {
       store: createDocumentStore(),
       schema,
+      eventQueue: [],
     };
 
     song = createOperation(context, 'Song', {
