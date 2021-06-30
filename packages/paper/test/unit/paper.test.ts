@@ -91,7 +91,7 @@ describe('mutation operations', () => {
     const events: Event[] = [];
     paper.events.addEventListener('hello', (e) => events.push(e));
     paper.hooks.beforeTransaction.push(({ queueEvent }) => queueEvent(new Event('hello')));
-    await paper.mutate(() => 'noop');
+    await paper.mutate(() => undefined);
     expect(events).to.have.lengthOf(1);
     expect(events[0].type).to.equal('hello');
   });

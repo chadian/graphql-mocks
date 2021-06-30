@@ -94,11 +94,14 @@ describe('happy path', () => {
     });
 
     it('returns the transaction payload from #mutate', async () => {
-      const payload = await paper.mutate(() => {
-        return 'from the transaction';
+      const payload = await paper.mutate(({ find }) => {
+        return find(account);
       });
 
-      expect(payload).to.equal('from the transaction');
+      expect(payload).to.deep.equal({
+        id: '1',
+        email: 'windows95@aol.com',
+      });
     });
 
     it('creates a new document', async () => {

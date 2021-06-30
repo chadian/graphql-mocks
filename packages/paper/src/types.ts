@@ -53,9 +53,18 @@ export type BoundOperationMap<T extends OperationMap> = {
   [P in keyof T]: OmitFirstArg<T[P]>;
 };
 
+export type AllowedTransactionCallbackReturnTypes =
+  | undefined
+  | null
+  | void
+  | Document
+  | Document[]
+  | Record<string, Document>;
+
 export interface TransactionCallback<T extends OperationMap> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (operations: BoundOperationMap<T>): any | Promise<any>;
+  (operations: BoundOperationMap<T>):
+    | AllowedTransactionCallbackReturnTypes
+    | Promise<AllowedTransactionCallbackReturnTypes>;
 }
 
 // validators
