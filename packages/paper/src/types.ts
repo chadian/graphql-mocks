@@ -58,8 +58,8 @@ export type AllowedTransactionCallbackReturnTypes =
   | null
   | void
   | Document
-  | Document[]
-  | Record<string, Document>;
+  | (Document | null | undefined)[]
+  | Record<string, Document | null | undefined>;
 
 export interface TransactionCallback<T extends OperationMap> {
   (operations: BoundOperationMap<T>):

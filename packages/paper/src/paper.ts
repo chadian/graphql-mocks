@@ -9,7 +9,6 @@ import { defaultOperations } from './operations/index';
 import { transaction } from './transaction/transaction';
 import { Queue } from './transaction/queue';
 import {
-  AllowedTransactionCallbackReturnTypes,
   Document,
   DocumentStore,
   DocumentTypeValidator,
@@ -29,10 +28,8 @@ import { nonNullFieldValidator } from './validations/validators/non-null-field';
 import { objectFieldValidator } from './validations/validators/object-field';
 import { scalarFieldValidator } from './validations/validators/scalar-field';
 import { uniqueIdFieldValidator } from './validations/validators/unique-id';
-import { isDocument } from './document/is-document';
-import { getDocumentKey } from './document/get-document-key';
-import { nullDocument } from './document/null-document';
-import { createConnectionProxy } from './document/create-connection-proxy';
+import { captureTransactionResultKeys } from './transaction/capture-transaction-result-keys';
+import { convertResultKeysToDocument } from './transaction/convert-result-keys-to-document';
 
 // Auto Freezing needs to be disabled because it interfers with using
 // of using js a `Proxy` on the resulting data, see:
@@ -133,84 +130,4 @@ export class Paper<UserOperations extends OperationMap = OperationMap> {
     finish();
     return convertResultKeysToDocument(schema, next, result) as ReturnType<T>;
   }
-}
-
-function convertResultKeysToDocument(
-  schema: GraphQLSchema,
-  store: DocumentStore,
-  result: null | undefined | string | string[] | Record<string, string>,
-): AllowedTransactionCallbackReturnTypes {
-  if (result === undefined || result === null) {
-    return result;
-  }
-
-  if (typeof result === 'string') {
-    const key = result;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const document = findDocument(store, key)!;
-    return document === nullDocument ? null : createConnectionProxy(schema, store, document);
-  }
-
-  if (Array.isArray(result)) {
-    result.map((key) => {
-      const document = findDocument(store, key);
-      return document === nullDocument ? null : document;
-    });
-  }
-
-  if (typeof result === 'object') {
-    const processed: Record<string, Document> = {};
-
-    for (const key in result) {
-      const documentKey = (result as Record<string, string>)[key];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const document = findDocument(store, documentKey)!;
-      (processed as Record<string, Document | null>)[key] = document === nullDocument ? null : document;
-    }
-
-    return processed;
-  }
-}
-
-function captureTransactionResultKeys(result: unknown): null | undefined | string | string[] | Record<string, string> {
-  const unallowedError = new Error(
-    'Return values from transactions must be null, undefined, a Document, array of Document or an object with Document values',
-  );
-
-  if (result === undefined || result === null) {
-    return result;
-  }
-
-  if (isDocument(result)) {
-    return getDocumentKey(result);
-  }
-
-  if (Array.isArray(result)) {
-    return result.map((item) => {
-      if (!isDocument(item)) {
-        throw unallowedError;
-      }
-
-      return getDocumentKey(item);
-    });
-  }
-
-  if (typeof result === 'object') {
-    const processed = {};
-
-    for (const key in result) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const item = (result as any)[key];
-      if (!isDocument(item)) {
-        throw unallowedError;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (processed as Record<string, string>)[key] = getDocumentKey(item);
-    }
-
-    return processed;
-  }
-
-  throw unallowedError;
 }

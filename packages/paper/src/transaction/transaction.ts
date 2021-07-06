@@ -10,6 +10,7 @@ import { GraphQLSchema } from 'graphql';
 import { collapseConnections } from '../document/collapse-connections';
 import { expandConnections } from '../document/expand-connections';
 import { sequential } from '../hooks/sequential';
+import { createBoundOperations } from './create-bound-operations';
 
 export async function transaction<T extends OperationMap>(
   store: DocumentStore,
@@ -31,18 +32,4 @@ export async function transaction<T extends OperationMap>(
 
   collapseConnections(schema, store);
   return { transactionResult, eventQueue };
-}
-
-function createBoundOperations(
-  operations: OperationMap,
-  context: OperationContext,
-): BoundOperationMap<typeof operations> {
-  const boundOperations: BoundOperationMap<typeof operations> = {};
-
-  for (const key in operations) {
-    const fn = operations[key];
-    boundOperations[key] = fn.bind(null, context);
-  }
-
-  return boundOperations;
 }

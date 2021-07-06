@@ -85,15 +85,8 @@ describe('happy path', () => {
     });
   });
 
-  describe('mutations', () => {
-    it('provides __typename on documents within #mutate', async () => {
-      await paper.mutate(({ find }) => {
-        const $account = find(account);
-        expect($account?.__typename).to.equal('Account');
-      });
-    });
-
-    it('returns the transaction payload from #mutate', async () => {
+  describe('mutation transaction payloads', () => {
+    it('returns a document', async () => {
       const payload = await paper.mutate(({ find }) => {
         return find(account);
       });
@@ -101,6 +94,47 @@ describe('happy path', () => {
       expect(payload).to.deep.equal({
         id: '1',
         email: 'windows95@aol.com',
+      });
+    });
+
+    it('returns an array of document', async () => {
+      const [first, second] = await paper.mutate(({ find }) => {
+        return [find(account), find(account)];
+      });
+
+      expect(first).to.deep.equal({
+        id: '1',
+        email: 'windows95@aol.com',
+      });
+
+      expect(second).to.deep.equal({
+        id: '1',
+        email: 'windows95@aol.com',
+      });
+    });
+
+    it('returns an object of documents', async () => {
+      const { first, second } = await paper.mutate(({ find }) => {
+        return { first: find(account), second: find(account) };
+      });
+
+      expect(first).to.deep.equal({
+        id: '1',
+        email: 'windows95@aol.com',
+      });
+
+      expect(second).to.deep.equal({
+        id: '1',
+        email: 'windows95@aol.com',
+      });
+    });
+  });
+
+  describe('mutations', () => {
+    it('provides __typename on documents within #mutate', async () => {
+      await paper.mutate(({ find }) => {
+        const $account = find(account);
+        expect($account?.__typename).to.equal('Account');
       });
     });
 
